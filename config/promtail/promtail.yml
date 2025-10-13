@@ -1,0 +1,143 @@
+# ============================================
+# Promtail Configuration for Log Shipping
+# Ships logs from Docker containers to Loki
+# ============================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # ============================================
+  # Docker Container Logs
+  # ============================================
+  - job_name: docker-containers
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-containers
+          __path__: /var/lib/docker/containers/*/*log
+    
+    pipeline_stages:
+      # Parse Docker JSON logs
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs:
+      
+      # Extract container name and service
+      - regex:
+          expression: '^/var/lib/docker/containers/(?P<container_id>[^/]+)/.*'
+          source: __path__
+      
+      # Add container labels
+      - docker: {}
+      
+      # Parse log levels
+      - regex:
+          expression: '(?i)(?P<level>(error|warn|info|debug|trace|fatal|panic))'
+          source: output
+      
+      # Add timestamp
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+      
+      # Output formatting
+      - output:
+          source: output
+
+  # ============================================
+  # Application Logs (if using file logging)
+  # ============================================
+  - job_name: instify-app-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: instify-app
+          __path__: /var/log/instify/*.log
+    
+    pipeline_stages:
+      # Parse structured JSON logs
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+            tenant_id: tenant_id
+      
+      # Set log level
+      - labels:
+          level:
+          service:
+      
+      # Timestamp parsing
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+      
+      # Output
+      - output:
+          source: message
+
+  # ============================================
+  # Nginx Access Logs
+  # ============================================
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-access
+          __path__: /var/log/nginx/access.log
+    
+    pipeline_stages:
+      # Parse Nginx access log format
+      - regex:
+          expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)"'
+      
+      # Add labels
+      - labels:
+          method:
+          status:
+          path:
+      
+      # Parse timestamp
+      - timestamp:
+          source: time_local
+          format: '02/Jan/2006:15:04:05 -0700'
+
+  # ============================================
+  # Nginx Error Logs
+  # ============================================
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-error
+          __path__: /var/log/nginx/error.log
+    
+    pipeline_stages:
+      # Parse Nginx error log format
+      - regex:
+          expression: '^(?P<timestamp>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<pid>\d+)#(?P<tid>\d+): (?P<message>.*)'
+      
+      # Add labels
+      - labels:
+          level:
+      
+      # Parse timestamp
+      - timestamp:
+          source: timestamp
+          format: '2006/01/02 15:04:05'

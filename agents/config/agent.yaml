@@ -1,0 +1,216 @@
+# ============================================
+# Instify Voice AI Agent Configuration
+# ============================================
+
+# ============================================
+# Agent Identity & Behavior
+# ============================================
+agent:
+  name: "Instify Voice AI Assistant"
+  version: "1.0.0"
+  description: "AI-powered voice assistant for customer engagement automation"
+  
+  # Conversation settings
+  conversation:
+    max_duration_seconds: 1800  # 30 minutes
+    timeout_seconds: 300        # 5 minutes of inactivity
+    enable_interruptions: true
+    default_language: "en"
+    
+  # Response behavior
+  response:
+    max_response_length: 100    # words
+    response_timeout: 10        # seconds
+    enable_thinking_time: true
+    thinking_time_max: 3        # seconds
+
+# ============================================
+# AI Model Configuration
+# ============================================
+models:
+  # Speech-to-Text (STT)
+  stt:
+    default_provider: "assemblyai"
+    providers:
+      assemblyai:
+        model: "universal-streaming"
+        language: "en"
+        features:
+          - real_time
+          - punctuation
+          - speaker_labels
+      
+      openai:
+        model: "whisper-1"
+        language: "en"
+        
+      deepgram:
+        model: "nova-2"
+        language: "en"
+        features:
+          - punctuation
+          - diarization
+  
+  # Large Language Model (LLM)
+  llm:
+    default_provider: "openai"
+    providers:
+      openai:
+        model: "gpt-4.1-mini"
+        temperature: 0.7
+        max_tokens: 150
+        
+      anthropic:
+        model: "claude-3-haiku-20240307"
+        temperature: 0.7
+        max_tokens: 150
+  
+  # Text-to-Speech (TTS)
+  tts:
+    default_provider: "cartesia"
+    providers:
+      cartesia:
+        model: "sonic-2"
+        voice_id: "9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"
+        speed: 1.0
+        
+      openai:
+        model: "tts-1"
+        voice: "alloy"
+        speed: 1.0
+        
+      elevenlabs:
+        model: "eleven_multilingual_v2"
+        voice_id: "21m00Tcm4TlvDq8ikWAM"
+        stability: 0.5
+        similarity_boost: 0.5
+
+# ============================================
+# Voice Processing
+# ============================================
+voice:
+  # Voice Activity Detection (VAD)
+  vad:
+    provider: "silero"
+    sensitivity: 0.5
+    min_speech_duration: 0.1
+    min_silence_duration: 0.5
+  
+  # Turn Detection
+  turn_detection:
+    provider: "multilingual"
+    sensitivity: 0.7
+    
+  # Noise Cancellation
+  noise_cancellation:
+    enabled: true
+    provider: "bvc"  # Background Voice Cancellation
+    strength: 0.8
+
+# ============================================
+# Business Logic
+# ============================================
+business:
+  # Customer engagement features
+  engagement:
+    enable_context_awareness: true
+    enable_conversation_history: true
+    enable_sentiment_analysis: true
+    
+  # Integration settings
+  integrations:
+    instify_platform:
+      enabled: true
+      api_timeout: 30
+      retry_attempts: 3
+      
+    crm_sync:
+      enabled: false
+      sync_interval: 300  # 5 minutes
+      
+  # Escalation rules
+  escalation:
+    enabled: true
+    keywords:
+      - "human agent"
+      - "speak to person"
+      - "escalate"
+      - "supervisor"
+      - "manager"
+      - "cancel"
+      - "refund"
+      - "billing issue"
+    
+    auto_escalate_after: 600  # 10 minutes
+    max_escalation_attempts: 3
+
+# ============================================
+# Analytics & Monitoring
+# ============================================
+analytics:
+  # Conversation tracking
+  conversation_logging:
+    enabled: true
+    log_level: "INFO"
+    include_audio: false
+    include_transcripts: true
+    
+  # Performance metrics
+  metrics:
+    enabled: true
+    collection_interval: 60  # seconds
+    retention_days: 30
+    
+  # Health monitoring
+  health_checks:
+    enabled: true
+    interval: 30  # seconds
+    endpoints:
+      - "/health"
+      - "/metrics"
+      - "/status"
+
+# ============================================
+# Security & Privacy
+# ============================================
+security:
+  # Data privacy
+  privacy:
+    anonymize_logs: true
+    data_retention_days: 90
+    pii_detection: true
+    
+  # Access control
+  access:
+    require_api_key: true
+    rate_limiting:
+      enabled: true
+      requests_per_minute: 60
+      
+  # Encryption
+  encryption:
+    in_transit: true
+    at_rest: true
+
+# ============================================
+# Development Settings
+# ============================================
+development:
+  # Debug options
+  debug:
+    enabled: false
+    log_level: "DEBUG"
+    verbose_logging: false
+    
+  # Testing
+  testing:
+    mock_ai_responses: false
+    simulate_latency: false
+    test_mode: false
+    
+  # Hot reload
+  hot_reload:
+    enabled: false
+    watch_directories:
+      - "/app/src"
+      - "/app/config"

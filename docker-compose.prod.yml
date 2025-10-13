@@ -1,0 +1,312 @@
+# ============================================
+# Production Docker Compose Configuration
+# Instify Platform - DigitalOcean Deployment
+# ============================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # Production Database (PostgreSQL 16)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: instify-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./config/postgres/postgresql.prod.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      - "127.0.0.1:5432:5432"  # Only localhost access
+    networks:
+      - instify-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # ============================================
+  # Production Cache (Redis 7)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: instify-redis-prod
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"  # Only localhost access
+    networks:
+      - instify-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # ============================================
+  # Production Web Application (Next.js)
+  # ============================================
+  instify-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: production
+    container_name: instify-web-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - LIVEKIT_URL=${LIVEKIT_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - instify-network
+    volumes:
+      - ./logs/web:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # ============================================
+  # Production LiveKit Server
+  # ============================================
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: instify-livekit-prod
+    restart: unless-stopped
+    ports:
+      - "7880:7880"   # HTTP
+      - "7881:7881"   # gRPC
+      - "50000-50100:50000-50100/udp"  # WebRTC
+    volumes:
+      - ./config/livekit.prod.yaml:/livekit.yaml:ro
+      - livekit_data:/data
+    command: --config /livekit.yaml
+    networks:
+      - instify-network
+    environment:
+      - LIVEKIT_EXTERNAL_IP=${SERVER_IP}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7880/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # ============================================
+  # Production LiveKit Agents (Voice AI)
+  # ============================================
+  livekit-agents:
+    build:
+      context: ./agents
+      dockerfile: Dockerfile.prod
+    container_name: instify-livekit-agents-prod
+    restart: unless-stopped
+    environment:
+      # LiveKit Connection
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      
+      # AI Services
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ASSEMBLYAI_API_KEY=${ASSEMBLYAI_API_KEY}
+      - CARTESIA_API_KEY=${CARTESIA_API_KEY}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      
+      # Production Configuration
+      - AGENT_MODE=production
+      - AGENT_LOG_LEVEL=info
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./agents/models:/app/models
+      - ./logs/agents:/app/logs
+    networks:
+      - instify-network
+    depends_on:
+      - livekit
+      - redis
+    ports:
+      - "127.0.0.1:8001:8001"  # Health checks only
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+
+  # ============================================
+  # Production Workflow Automation (n8n)
+  # ============================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: instify-n8n-prod
+    restart: unless-stopped
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL}
+      - GENERIC_TIMEZONE=${TIMEZONE:-UTC}
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${DB_NAME}
+      - DB_POSTGRESDB_USER=${DB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
+      - DB_POSTGRESDB_SCHEMA=n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./config/n8n:/home/node/.n8n/custom:ro
+      - ./logs/n8n:/home/node/.n8n/logs
+    networks:
+      - instify-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  # ============================================
+  # Production Reverse Proxy (Nginx)
+  # ============================================
+  nginx:
+    image: nginx:alpine
+    container_name: instify-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/prod.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - instify-network
+    depends_on:
+      - instify-web
+      - n8n
+      - livekit
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # ============================================
+  # Production Database Backup
+  # ============================================
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local:16
+    container_name: instify-postgres-backup-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      SCHEDULE: "${BACKUP_SCHEDULE:-@daily}"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
+    volumes:
+      - ./backups:/backups
+    networks:
+      - instify-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+# ============================================
+# Production Volumes
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  n8n_data:
+    driver: local
+  livekit_data:
+    driver: local
+
+# ============================================
+# Production Networks
+# ============================================
+networks:
+  instify-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

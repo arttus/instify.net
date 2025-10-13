@@ -1,0 +1,33 @@
+# ============================================
+# Grafana Dashboard Provisioning
+# Auto-load dashboards from filesystem
+# ============================================
+
+apiVersion: 1
+
+providers:
+  # ============================================
+  # Instify Dashboards
+  # ============================================
+  - name: 'instify-dashboards'
+    orgId: 1
+    folder: 'Instify'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+
+  # ============================================
+  # System Dashboards
+  # ============================================
+  - name: 'system-dashboards'
+    orgId: 1
+    folder: 'System'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/system

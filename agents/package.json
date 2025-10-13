@@ -1,0 +1,68 @@
+{
+  "name": "@instify/voice-agents",
+  "version": "1.0.0",
+  "description": "AI-powered voice assistant for customer engagement automation using LiveKit Agents JS",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/main.ts dev",
+    "start": "node dist/main.js start",
+    "console": "tsx src/main.ts console",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@livekit/agents": "^1.0.0",
+    "@livekit/agents-plugin-openai": "^1.0.0",
+    "@livekit/agents-plugin-google": "^1.0.0",
+    "@livekit/agents-plugin-cartesia": "^1.0.0",
+    "@livekit/agents-plugin-deepgram": "^1.0.0",
+    "@livekit/agents-plugin-elevenlabs": "^1.0.0",
+    "@livekit/agents-plugin-silero": "^1.0.0",
+    "@livekit/agents-plugin-livekit": "^1.0.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.22.4",
+    "dotenv": "^16.3.1",
+    "systeminformation": "^5.21.20",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/js-yaml": "^4.0.9",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "tsx": "^4.6.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "livekit",
+    "agents",
+    "voice-ai",
+    "customer-engagement",
+    "instify",
+    "typescript"
+  ],
+  "author": "Instify Team",
+  "license": "MIT"
+}

@@ -1,0 +1,93 @@
+# ============================================
+# LiveKit Agents Development Dockerfile
+# Voice AI Agents for Instify Platform (Node.js/TypeScript)
+# ============================================
+
+FROM node:20-slim
+
+# ============================================
+# System Dependencies
+# ============================================
+RUN apt-get update && apt-get install -y \
+    # Build tools
+    build-essential \
+    pkg-config \
+    python3 \
+    # Audio libraries
+    libportaudio2 \
+    libportaudiocpp0 \
+    portaudio19-dev \
+    # Video libraries (for future multimodal support)
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libswresample-dev \
+    libavfilter-dev \
+    # System utilities
+    curl \
+    wget \
+    git \
+    # Cleanup
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================
+# Node.js Environment
+# ============================================
+# Set working directory
+WORKDIR /app
+
+# Install pnpm for fast package management
+RUN npm install -g pnpm
+
+# Copy package files first for better caching
+COPY package.json pnpm-lock.yaml* ./
+
+# Install Node.js dependencies
+RUN pnpm install
+
+# ============================================
+# Application Setup
+# ============================================
+# Copy TypeScript configuration and source code
+COPY tsconfig.json tsup.config.ts ./
+COPY src/ ./src/
+COPY config/ ./config/
+COPY start.sh ./start.sh
+
+# Build the TypeScript application
+RUN pnpm build
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/models /app/data
+
+# Make startup script executable
+RUN chmod +x /app/start.sh
+
+# ============================================
+# Development Configuration
+# ============================================
+# Set environment variables
+ENV NODE_ENV=development
+ENV LIVEKIT_LOG_LEVEL=debug
+
+# Create non-root user for security
+RUN useradd -m -u 1000 agent && \
+    chown -R agent:agent /app
+USER agent
+
+# ============================================
+# Health Check
+# ============================================
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# ============================================
+# Entry Point
+# ============================================
+# Expose ports
+EXPOSE 8000 8001
+
+# Default command (can be overridden)
+CMD ["./start.sh"]

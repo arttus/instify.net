@@ -1,0 +1,168 @@
+# ============================================
+# AlertManager Configuration
+# Handle and route alerts from Prometheus
+# ============================================
+
+global:
+  # SMTP configuration for email alerts
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@instify.com'
+  smtp_auth_username: 'alerts@instify.com'
+  smtp_auth_password: 'your-email-password'
+  
+  # Slack configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+# ============================================
+# Templates
+# ============================================
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# ============================================
+# Routing Configuration
+# ============================================
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default-receiver'
+  
+  routes:
+    # Critical alerts go to multiple channels
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      repeat_interval: 30m
+    
+    # Warning alerts go to Slack only
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      repeat_interval: 2h
+    
+    # Database alerts
+    - match_re:
+        alertname: 'PostgreSQL.*|Redis.*'
+      receiver: 'database-alerts'
+    
+    # Application alerts
+    - match_re:
+        alertname: 'WebApplication.*|HighResponseTime|HighErrorRate'
+      receiver: 'application-alerts'
+
+# ============================================
+# Receivers Configuration
+# ============================================
+receivers:
+  # Default receiver (minimal notifications)
+  - name: 'default-receiver'
+    slack_configs:
+      - api_url: '{{ .slack_api_url }}'
+        channel: '#instify-alerts'
+        title: 'Instify Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+  # Critical alerts (email + Slack + webhook)
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'admin@instify.com'
+        subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        body: |
+          Alert: {{ .GroupLabels.alertname }}
+          Severity: {{ .CommonLabels.severity }}
+          
+          {{ range .Alerts }}
+          Summary: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+          
+          View in Grafana: http://your-domain.com:3001
+    
+    slack_configs:
+      - api_url: '{{ .slack_api_url }}'
+        channel: '#instify-critical'
+        color: 'danger'
+        title: '🚨 CRITICAL ALERT'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .CommonLabels.severity }}
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+    
+    webhook_configs:
+      - url: 'http://instify-web:3000/api/webhooks/alerts'
+        send_resolved: true
+
+  # Warning alerts (Slack only)
+  - name: 'warning-alerts'
+    slack_configs:
+      - api_url: '{{ .slack_api_url }}'
+        channel: '#instify-alerts'
+        color: 'warning'
+        title: '⚠️ Warning Alert'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          {{ end }}
+
+  # Database-specific alerts
+  - name: 'database-alerts'
+    email_configs:
+      - to: 'dba@instify.com'
+        subject: '🗄️ Database Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Database Alert: {{ .GroupLabels.alertname }}
+          
+          {{ range .Alerts }}
+          Summary: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+    
+    slack_configs:
+      - api_url: '{{ .slack_api_url }}'
+        channel: '#instify-database'
+        color: 'warning'
+        title: '🗄️ Database Alert'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          {{ end }}
+
+  # Application-specific alerts
+  - name: 'application-alerts'
+    slack_configs:
+      - api_url: '{{ .slack_api_url }}'
+        channel: '#instify-app'
+        color: 'warning'
+        title: '🚀 Application Alert'
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          {{ end }}
+
+# ============================================
+# Inhibit Rules
+# ============================================
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  # Inhibit database connection alerts if database is down
+  - source_match:
+      alertname: 'PostgreSQLDown'
+    target_match_re:
+      alertname: 'PostgreSQL.*'
+    equal: ['instance']

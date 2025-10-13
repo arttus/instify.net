@@ -1,0 +1,184 @@
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+
+export default function Home() {
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-6xl font-bold mb-6">
+              Instify
+            </h1>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" asChild>
+                <Link href="/sign-in">Admin Login</Link>
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Multi-tenant B2B SaaS platform for AI-powered customer engagement automation
+            across Instagram DMs, SMS, WhatsApp, and voice channels.
+          </p>
+
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🤖 AI Automation
+                </CardTitle>
+                <CardDescription>
+                  Powered by OpenAI and Anthropic for intelligent customer conversations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Advanced AI models handle complex customer interactions with context awareness
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  📱 Multi-Channel
+                </CardTitle>
+                <CardDescription>
+                  Instagram DMs, SMS, WhatsApp, and voice calls in one platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Unified inbox for all customer communications across channels
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🏢 Multi-Tenant
+                </CardTitle>
+                <CardDescription>
+                  Secure, scalable architecture supporting multiple client organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Row-level security ensures complete data isolation between tenants
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Technology Stack */}
+          <Card className="mt-12 max-w-4xl mx-auto">
+            <CardHeader>
+              <CardTitle>🛠️ Technology Stack</CardTitle>
+              <CardDescription>
+                Built with modern, scalable technologies and protocols
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-semibold">Frontend</div>
+                  <div className="text-muted-foreground">Next.js 15, Tailwind CSS, ShadCN UI</div>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-semibold">AI Protocol</div>
+                  <div className="text-muted-foreground">AG-UI, CopilotKit, OpenAI GPT-4</div>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-semibold">Authentication</div>
+                  <div className="text-muted-foreground">Clerk, Multi-tenant</div>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="font-semibold">Infrastructure</div>
+                  <div className="text-muted-foreground">Docker, PostgreSQL, Redis</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Demo Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 max-w-6xl mx-auto">
+            {/* AG-UI Demo */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🤖 AG-UI Protocol Demo
+                </CardTitle>
+                <CardDescription>
+                  Experience the Agent-User Interaction Protocol in action
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  See how Instify leverages the AG-UI protocol for real-time agent communication,
+                  shared state management, and interactive AI controls.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="/ag-ui-demo">
+                    View AG-UI Demo
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* LiveKit Demo */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🎙️ LiveKit Voice AI Demo
+                </CardTitle>
+                <CardDescription>
+                  Real-time voice and video communication platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Experience AI-powered voice interactions, room management,
+                  and multi-participant communication for customer engagement.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="/livekit-demo">
+                    View LiveKit Demo
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-12 space-y-4">
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Button size="lg" asChild>
+                <Link href="/sign-in">Admin Login</Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/livekit-demo">Try Voice AI Demo</Link>
+              </Button>
+              <Button variant="secondary" size="lg" asChild>
+                <Link href="/api/health">Health Check</Link>
+              </Button>
+              <Button variant="ghost" size="lg" asChild>
+                <Link href="/api/metrics">System Metrics</Link>
+              </Button>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Environment: {process.env.NODE_ENV || 'development'} |
+              Version: {process.env.npm_package_version || '1.0.0'}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

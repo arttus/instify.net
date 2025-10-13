@@ -1,0 +1,124 @@
+# ============================================
+# Livekit Development Configuration
+# Simplified settings for local development
+# ============================================
+
+# ============================================
+# Server Settings
+# ============================================
+port: 7880
+bind_addresses:
+  - ""
+
+# ============================================
+# RTC Configuration (Development)
+# ============================================
+rtc:
+  # Smaller port range for development
+  port_range_start: 50000
+  port_range_end: 50100
+  
+  # Use localhost for development
+  use_external_ip: false
+  
+  # Simple ICE configuration for local development
+  ice_servers:
+    - urls:
+        - "stun:stun.l.google.com:19302"
+
+# ============================================
+# Redis Configuration (No password for dev)
+# ============================================
+redis:
+  address: "redis:6379"
+  db: 0
+
+# ============================================
+# Development API Keys
+# ============================================
+keys:
+  # Simple development keys (not secure, dev only!)
+  devkey: secret
+  testkey: test123
+
+# ============================================
+# Room Configuration (Development)
+# ============================================
+room:
+  auto_create: true
+  empty_timeout: 60s  # Shorter timeout for development
+  max_participants: 10  # Smaller limit for testing
+  enable_recording: false
+
+# ============================================
+# Audio Configuration
+# ============================================
+audio:
+  codecs:
+    - mime: "audio/opus"
+      fmtp: "minptime=10;useinbandfec=1"
+
+# ============================================
+# Video Configuration
+# ============================================
+video:
+  codecs:
+    - mime: "video/H264"
+      fmtp: "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f"
+
+# ============================================
+# Development Logging (Verbose)
+# ============================================
+logging:
+  level: debug
+  json: false  # Human-readable logs for development
+  
+# ============================================
+# Webhook Configuration (Development)
+# ============================================
+webhook:
+  urls:
+    - "http://instify-web:3000/api/webhooks/livekit"
+    - "http://livekit-agents:8000/webhooks/livekit"
+  api_key: "dev-webhook-secret"
+
+# ============================================
+# TURN Server (Disabled for local dev)
+# ============================================
+turn:
+  enabled: false
+
+# ============================================
+# Development Settings
+# ============================================
+development:
+  disable_strict_config: true
+  log_rtc_packets: false  # Set to true for deep debugging
+
+# ============================================
+# Resource Limits (Lower for development)
+# ============================================
+cpu_cost:
+  video_cpu_count: 1
+  audio_cpu_count: 1
+
+memory:
+  max_memory_mb: 512
+
+# ============================================
+# Agent Integration (Development)
+# ============================================
+agents:
+  # Enable agent dispatch
+  enabled: true
+
+  # Agent configuration
+  dispatch:
+    # Automatically assign agents to rooms
+    auto_assign: true
+
+    # Agent selection strategy
+    strategy: "round_robin"  # or "least_loaded"
+
+    # Agent timeout
+    timeout: 30s

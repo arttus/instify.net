@@ -1,0 +1,203 @@
+# ============================================
+# LiveKit Production Configuration
+# Instify Platform - DigitalOcean Deployment
+# ============================================
+
+# ============================================
+# Server Settings
+# ============================================
+port: 7880
+bind_addresses:
+  - ""
+
+# ============================================
+# RTC Configuration (Production)
+# ============================================
+rtc:
+  # Production port range for WebRTC
+  port_range_start: 50000
+  port_range_end: 50100
+  
+  # Use external IP for production
+  use_external_ip: true
+  
+  # ICE servers for production
+  ice_servers:
+    - urls:
+        - "stun:stun.l.google.com:19302"
+        - "stun:stun1.l.google.com:19302"
+    # Add TURN server if needed for NAT traversal
+    # - urls:
+    #     - "turn:your-turn-server.com:3478"
+    #   username: "your-turn-username"
+    #   credential: "your-turn-password"
+
+# ============================================
+# Redis Configuration (Production)
+# ============================================
+redis:
+  address: "redis:6379"
+  password: "${REDIS_PASSWORD}"
+  db: 0
+
+# ============================================
+# API Keys (Production)
+# ============================================
+keys:
+  # Production API keys from environment
+  "${LIVEKIT_API_KEY}": "${LIVEKIT_API_SECRET}"
+
+# ============================================
+# Room Configuration (Production)
+# ============================================
+room:
+  # Automatically create rooms
+  auto_create: true
+  
+  # Production timeout settings
+  empty_timeout: 300s  # 5 minutes
+  
+  # Higher participant limit for production
+  max_participants: 100
+  
+  # Enable recording for production
+  enable_recording: false  # Set to true if you want recording
+
+# ============================================
+# Audio Configuration
+# ============================================
+audio:
+  codecs:
+    - mime: "audio/opus"
+      fmtp: "minptime=10;useinbandfec=1"
+    - mime: "audio/red"
+    - mime: "audio/telephone-event"
+
+# ============================================
+# Video Configuration
+# ============================================
+video:
+  codecs:
+    - mime: "video/H264"
+      fmtp: "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f"
+    - mime: "video/H264"
+      fmtp: "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f"
+
+# ============================================
+# Logging Configuration (Production)
+# ============================================
+logging:
+  level: info
+  file: "/data/livekit.log"
+  json: true
+
+# ============================================
+# Webhook Configuration (Production)
+# ============================================
+webhook:
+  urls:
+    - "https://your-domain.com/api/webhooks/livekit"
+    - "http://livekit-agents:8000/webhooks/livekit"
+  api_key: "${LIVEKIT_WEBHOOK_SECRET}"
+
+# ============================================
+# Turn Server (Production)
+# ============================================
+turn:
+  enabled: false  # Enable if you have a TURN server
+  # external_tls: true
+  # cert_file: "/path/to/cert.pem"
+  # key_file: "/path/to/key.pem"
+
+# ============================================
+# Performance Tuning (Production)
+# ============================================
+cpu_cost:
+  video_cpu_count: 8
+  audio_cpu_count: 4
+
+memory:
+  max_memory_mb: 4096  # 4GB limit
+
+# ============================================
+# Agent Integration (Production)
+# ============================================
+agents:
+  # Enable agent dispatch
+  enabled: true
+  
+  # Agent configuration
+  dispatch:
+    # Automatically assign agents to rooms
+    auto_assign: true
+    
+    # Agent selection strategy
+    strategy: "least_loaded"  # Better for production
+    
+    # Agent timeout
+    timeout: 60s
+
+# ============================================
+# Security Configuration
+# ============================================
+security:
+  # Enable token validation
+  enable_token_validation: true
+  
+  # Token expiration
+  token_expiration: 3600  # 1 hour
+
+# ============================================
+# Monitoring Configuration
+# ============================================
+monitoring:
+  # Enable Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 6789
+  
+  # Health check configuration
+  health_check:
+    enabled: true
+    interval: 30s
+
+# ============================================
+# Recording Configuration (Optional)
+# ============================================
+recording:
+  # Enable recording service
+  enabled: false
+  
+  # Recording storage
+  # storage:
+  #   type: "s3"
+  #   bucket: "your-recordings-bucket"
+  #   region: "us-east-1"
+  #   access_key: "${AWS_ACCESS_KEY_ID}"
+  #   secret_key: "${AWS_SECRET_ACCESS_KEY}"
+
+# ============================================
+# Ingress Configuration (Optional)
+# ============================================
+ingress:
+  # Enable ingress for streaming
+  enabled: false
+  
+  # RTMP configuration
+  # rtmp:
+  #   enabled: true
+  #   port: 1935
+
+# ============================================
+# Egress Configuration (Optional)
+# ============================================
+egress:
+  # Enable egress for streaming out
+  enabled: false
+  
+  # Template configurations
+  # templates:
+  #   - name: "default"
+  #     layout: "grid"
+  #     width: 1920
+  #     height: 1080
