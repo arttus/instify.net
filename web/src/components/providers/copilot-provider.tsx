@@ -27,7 +27,7 @@ export function CopilotProvider({ children }: CopilotProviderProps) {
 
 Always provide helpful, accurate information and ask clarifying questions when needed."
         labels={{
-          title: "Instify AI Assistant (AG-UI Compatible)",
+          title: "Instify AI Assistant",
           initial: "Hi! I'm your Instify AI assistant, powered by the AG-UI protocol. How can I help you today?",
           placeholder: "Ask me about automation workflows, customer engagement, or platform features...",
         }}
