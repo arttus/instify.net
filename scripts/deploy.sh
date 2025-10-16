@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Instify Production Deployment Script
+# ODEUO Production Deployment Script
 # Enhanced version with error handling and validation
 # ============================================
 
@@ -16,8 +16,8 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-DOMAIN="${DOMAIN:-instify.yourdomain.com}"
-DROPLET_NAME="${DROPLET_NAME:-instify-production}"
+DOMAIN="${DOMAIN:-odeuo.yourdomain.com}"
+DROPLET_NAME="${DROPLET_NAME:-odeuo-production}"
 DROPLET_SIZE="${DROPLET_SIZE:-s-2vcpu-4gb}"
 DROPLET_REGION="${DROPLET_REGION:-nyc3}"
 
@@ -176,8 +176,8 @@ setup_server() {
         apt install docker-compose-plugin -y
         
         echo "📁 Creating project directory..."
-        mkdir -p /root/instify
-        cd /root/instify
+        mkdir -p /root/odeuo
+        cd /root/odeuo
         
         echo "🔥 Setting up firewall..."
         ufw allow 22/tcp
@@ -201,16 +201,16 @@ deploy_application() {
     # Copy project files
     log "Copying project files..."
     rsync -avz --exclude='.git' --exclude='node_modules' --exclude='.env*' \
-        "$PROJECT_DIR/" root@"$DROPLET_IP":/root/instify/
+        "$PROJECT_DIR/" root@"$DROPLET_IP":/root/odeuo/
     
     # Copy production environment file
     log "Copying environment configuration..."
-    scp "$PROJECT_DIR/.env.production" root@"$DROPLET_IP":/root/instify/.env
+    scp "$PROJECT_DIR/.env.production" root@"$DROPLET_IP":/root/odeuo/.env
     
     # Deploy on server
     ssh -o StrictHostKeyChecking=no root@"$DROPLET_IP" << ENDSSH
         set -e
-        cd /root/instify
+        cd /root/odeuo
         
         echo "🔧 Setting up SSL certificates..."
         apt install certbot -y
@@ -236,7 +236,7 @@ deploy_application() {
         sleep 60
         
         echo "🗄️  Running database migrations..."
-        docker compose exec -T instify-web npm run db:migrate || echo "Migration failed, continuing..."
+        docker compose exec -T odeuo-web npm run db:migrate || echo "Migration failed, continuing..."
         
         echo "🔄 Setting up SSL certificate renewal..."
         echo "0 12 * * * /usr/bin/certbot renew --quiet && docker compose restart nginx" | crontab -
@@ -271,7 +271,7 @@ setup_backups() {
         echo "After configuration, backups will sync every 6 hours"
         
         # Add backup sync to crontab
-        echo "0 */6 * * * rclone sync /root/instify/backups do-spaces:instify-backups" >> /etc/crontab
+        echo "0 */6 * * * rclone sync /root/odeuo/backups do-spaces:odeuo-backups" >> /etc/crontab
         
         echo "✅ Backup setup complete"
 ENDSSH
@@ -302,7 +302,7 @@ run_health_checks() {
     
     # Test database connection
     ssh -o StrictHostKeyChecking=no root@"$DROPLET_IP" << 'ENDSSH'
-        if docker compose exec -T postgres pg_isready -U instify; then
+        if docker compose exec -T postgres pg_isready -U odeuo; then
             echo "✅ Database health check passed"
         else
             echo "⚠️  Database health check failed"
@@ -315,7 +315,7 @@ ENDSSH
 # ============================================
 
 main() {
-    echo "🚀 Instify Production Deployment"
+    echo "🚀 ODEUO Production Deployment"
     echo "================================="
     echo "Domain: $DOMAIN"
     echo "Droplet: $DROPLET_NAME"

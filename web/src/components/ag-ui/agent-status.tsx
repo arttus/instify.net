@@ -11,7 +11,7 @@ interface AgentStatusProps {
 
 type AgentState = 'idle' | 'thinking' | 'working' | 'waiting' | 'error'
 
-export function AgentStatus({ agentId = 'instify-agent', className }: AgentStatusProps) {
+export function AgentStatus({ agentId = 'odeuo-agent', className }: AgentStatusProps) {
   const [state, setState] = useState<AgentState>('idle')
   const [message, setMessage] = useState('Agent is ready')
   const [progress, setProgress] = useState(0)

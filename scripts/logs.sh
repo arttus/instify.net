@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Instify Logs Management Script
+# ODEUO Logs Management Script
 # View, filter, and manage application logs
 # ============================================
 
@@ -249,7 +249,7 @@ tail_multiple_services() {
     local services=("$@")
     
     if [[ ${#services[@]} -eq 0 ]]; then
-        services=("instify-web" "postgres" "redis" "nginx")
+        services=("odeuo-web" "postgres" "redis" "nginx")
     fi
     
     log "Tailing logs from services: ${services[*]}"
@@ -269,7 +269,7 @@ tail_multiple_services() {
         # Read from pipe with color coding
         (while read -r line; do
             case "$service" in
-                "instify-web") echo -e "${GREEN}$line${NC}" ;;
+                "odeuo-web") echo -e "${GREEN}$line${NC}" ;;
                 "postgres") echo -e "${BLUE}$line${NC}" ;;
                 "redis") echo -e "${YELLOW}$line${NC}" ;;
                 "nginx") echo -e "${CYAN}$line${NC}" ;;
@@ -306,15 +306,15 @@ show_usage() {
     echo "Options:"
     echo "  follow    Follow logs in real-time (true/false)"
     echo "  lines     Number of lines to show (default: 100)"
-    echo "  service   Service name (instify-web, postgres, redis, nginx, n8n, livekit)"
+    echo "  service   Service name (odeuo-web, postgres, redis, nginx, n8n, livekit)"
     echo
     echo "Examples:"
     echo "  $0 all true 50               # Follow all logs, last 50 lines"
-    echo "  $0 service instify-web       # Show web app logs"
+    echo "  $0 service odeuo-web       # Show web app logs"
     echo "  $0 errors postgres           # Show PostgreSQL errors"
     echo "  $0 search 'database error'   # Search for database errors"
-    echo "  $0 export instify-web        # Export web app logs"
-    echo "  $0 tail instify-web postgres # Tail web and database logs"
+    echo "  $0 export odeuo-web        # Export web app logs"
+    echo "  $0 tail odeuo-web postgres # Tail web and database logs"
 }
 
 # ============================================

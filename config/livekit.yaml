@@ -1,6 +1,6 @@
 # ============================================
 # Livekit Server Configuration
-# Real-time Voice/Video for Instify
+# Real-time Voice/Video for ODEUO
 # ============================================
 
 # ============================================
@@ -101,7 +101,7 @@ logging:
 webhook:
   # Webhook URLs to notify about room events
   urls:
-    - "http://instify-web:3000/api/webhooks/livekit"
+    - "http://odeuo-web:3000/api/webhooks/livekit"
   
   # API key for webhook authentication
   api_key: "${LIVEKIT_WEBHOOK_SECRET}"

@@ -4,13 +4,13 @@ export async function GET() {
   try {
     // Basic Prometheus metrics format
     const metrics = [
-      '# HELP instify_app_info Application information',
-      '# TYPE instify_app_info gauge',
-      `instify_app_info{version="${process.env.npm_package_version || '1.0.0'}",environment="${process.env.NODE_ENV || 'development'}"} 1`,
+      '# HELP odeuo_app_info Application information',
+      '# TYPE odeuo_app_info gauge',
+      `odeuo_app_info{version="${process.env.npm_package_version || '1.0.0'}",environment="${process.env.NODE_ENV || 'development'}"} 1`,
       '',
-      '# HELP instify_uptime_seconds Application uptime in seconds',
-      '# TYPE instify_uptime_seconds counter',
-      `instify_uptime_seconds ${process.uptime()}`,
+      '# HELP odeuo_uptime_seconds Application uptime in seconds',
+      '# TYPE odeuo_uptime_seconds counter',
+      `odeuo_uptime_seconds ${process.uptime()}`,
       '',
       '# HELP nodejs_memory_usage_bytes Node.js memory usage',
       '# TYPE nodejs_memory_usage_bytes gauge',

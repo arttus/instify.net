@@ -1,5 +1,5 @@
 {
-  "name": "@instify/voice-agents",
+  "name": "@odeuo/voice-agents",
   "version": "1.0.0",
   "description": "AI-powered voice assistant for customer engagement automation using LiveKit Agents JS",
   "type": "module",
@@ -60,9 +60,9 @@
     "agents",
     "voice-ai",
     "customer-engagement",
-    "instify",
+    "odeuo",
     "typescript"
   ],
-  "author": "Instify Team",
+  "author": "ODEUO Team",
   "license": "MIT"
 }

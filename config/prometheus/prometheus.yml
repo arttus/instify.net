@@ -1,5 +1,5 @@
 # ============================================
-# Prometheus Configuration for Instify
+# Prometheus Configuration for ODEUO
 # Metrics collection and alerting rules
 # ============================================
 
@@ -7,7 +7,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'instify-production'
+    cluster: 'odeuo-production'
     environment: 'production'
 
 # ============================================
@@ -60,9 +60,9 @@ scrape_configs:
     scrape_interval: 30s
 
   # Application health checks
-  - job_name: 'instify-web'
+  - job_name: 'odeuo-web'
     static_configs:
-      - targets: ['instify-web:3000']
+      - targets: ['odeuo-web:3000']
     metrics_path: '/api/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s

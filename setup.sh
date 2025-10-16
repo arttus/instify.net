@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Instify Local Setup Script
+# ODEUO Local Setup Script
 # Generates secure passwords and sets up environment
 # ============================================
 
@@ -49,7 +49,7 @@ generate_secret() {
 main() {
     local environment="${1:-local}"
 
-    echo "🚀 Instify Infrastructure Setup"
+    echo "🚀 ODEUO Infrastructure Setup"
     echo "==============================="
     echo "Environment: $environment"
     echo ""
@@ -83,6 +83,8 @@ main() {
     N8N_ENCRYPTION_KEY=$(generate_secret)
     LIVEKIT_API_SECRET=$(generate_secret)
     GRAFANA_PASSWORD=$(generate_password)
+    TWENTY_DB_PASSWORD=$(generate_password)
+    TWENTY_APP_SECRET=$(generate_secret)
 
     success "Secure passwords generated"
 
@@ -101,7 +103,7 @@ main() {
 
     # Create necessary directories
     log "Creating directory structure..."
-    mkdir -p logs/{nginx,postgres,web,n8n} backups
+    mkdir -p logs/{nginx,postgres,web,n8n,twenty,twenty-worker} backups
     success "Directory structure created"
 
     # Start Docker services
@@ -115,23 +117,36 @@ main() {
 
         # Run database migrations
         log "Running database migrations..."
-        docker-compose exec -T instify-web npm run db:migrate || warning "Migration failed - database may not be ready yet"
+        docker-compose exec -T odeuo-web npm run db:migrate || warning "Migration failed - database may not be ready yet"
 
         # Seed development data
         log "Seeding development data..."
-        docker-compose exec -T instify-web npm run db:seed || warning "Seeding failed - will retry later"
+        docker-compose exec -T odeuo-web npm run db:seed || warning "Seeding failed - will retry later"
 
         success "Development environment started successfully!"
         echo ""
         echo "🌐 Access your services:"
-        echo "   Main App:     http://localhost"
-        echo "   n8n Admin:    http://localhost/n8n"
-        echo "   pgAdmin:      http://localhost/pgadmin (admin@instify.com / admin)"
-        echo "   RedisInsight:  http://localhost/redis"
-        echo "   Health Check: http://localhost/health"
+
+        # Check if using subdomains
+        if grep -q "DOMAIN=odeuo.local" .env 2>/dev/null; then
+            echo "   Main App:      http://odeuo.local"
+            echo "   n8n:           http://n8n.odeuo.local"
+            echo "   Twenty CRM:    http://crm.odeuo.local"
+            echo "   LiveKit:       http://livekit.odeuo.local"
+            echo "   pgAdmin:       http://pgadmin.odeuo.local"
+            echo "   Redis Insight: http://redis.odeuo.local"
+        else
+            echo "   Main App:      http://localhost"
+            echo "   n8n Admin:     http://localhost/n8n"
+            echo "   Twenty CRM:    http://localhost:3002"
+            echo "   pgAdmin:       http://localhost/pgadmin (admin@odeuo.com / admin)"
+            echo "   Redis Insight: http://localhost/redis"
+            echo "   Health Check:  http://localhost/health"
+        fi
+
         echo ""
         echo "📋 Generated passwords saved to .env"
-        echo "🔧 Run 'npm run logs' to view service logs"
+        echo "🔧 Run 'docker-compose logs -f' to view service logs"
 
     else
         success "Production environment configured!"
@@ -149,12 +164,104 @@ main() {
 # Environment Setup Functions
 # ============================================
 
+configure_local_hosts() {
+    log "Configuring local DNS (/etc/hosts)..."
+
+    # Check if entries already exist
+    if grep -q "odeuo.local" /etc/hosts 2>/dev/null; then
+        success "Local subdomains already configured in /etc/hosts"
+        return
+    fi
+
+    warning "Local subdomains need to be added to /etc/hosts"
+    echo ""
+    echo "The following entries will be added to /etc/hosts:"
+    echo "  127.0.0.1 odeuo.local"
+    echo "  127.0.0.1 n8n.odeuo.local"
+    echo "  127.0.0.1 crm.odeuo.local"
+    echo "  127.0.0.1 livekit.odeuo.local"
+    echo "  127.0.0.1 pgadmin.odeuo.local"
+    echo "  127.0.0.1 redis.odeuo.local"
+    echo ""
+    read -p "Add these entries now? (requires sudo) (y/N): " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        log "Adding entries to /etc/hosts..."
+
+        # Create a temporary file with the entries
+        cat > /tmp/odeuo-hosts << 'EOF'
+
+# ============================================
+# ODEUO Local Development Subdomains
+# ============================================
+127.0.0.1 odeuo.local
+127.0.0.1 n8n.odeuo.local
+127.0.0.1 crm.odeuo.local
+127.0.0.1 livekit.odeuo.local
+127.0.0.1 pgadmin.odeuo.local
+127.0.0.1 redis.odeuo.local
+EOF
+
+        # Append to /etc/hosts
+        sudo sh -c 'cat /tmp/odeuo-hosts >> /etc/hosts'
+        rm /tmp/odeuo-hosts
+
+        success "Local subdomains added to /etc/hosts"
+    else
+        warning "Skipped /etc/hosts configuration"
+        warning "You can add these entries manually later:"
+        echo ""
+        echo "sudo tee -a /etc/hosts << 'EOF'"
+        echo "127.0.0.1 odeuo.local"
+        echo "127.0.0.1 n8n.odeuo.local"
+        echo "127.0.0.1 crm.odeuo.local"
+        echo "127.0.0.1 livekit.odeuo.local"
+        echo "127.0.0.1 pgadmin.odeuo.local"
+        echo "127.0.0.1 redis.odeuo.local"
+        echo "EOF"
+        echo ""
+    fi
+}
+
 setup_local_environment() {
-    log "Setting up local development environment..."
+    log "Setting up local development environment with subdomains..."
+
+    # Ask if user wants to use subdomains
+    echo ""
+    echo "Would you like to use local subdomains for development?"
+    echo "  - Main app: http://odeuo.local"
+    echo "  - n8n: http://n8n.odeuo.local"
+    echo "  - CRM: http://crm.odeuo.local"
+    echo "  - LiveKit: http://livekit.odeuo.local"
+    echo "  - pgAdmin: http://pgadmin.odeuo.local"
+    echo "  - Redis: http://redis.odeuo.local"
+    echo ""
+    read -p "Use subdomains? (y/N): " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        USE_SUBDOMAINS=true
+        DOMAIN="odeuo.local"
+        APP_URL="http://odeuo.local"
+        N8N_URL="http://n8n.odeuo.local"
+        CRM_URL="http://crm.odeuo.local"
+        LIVEKIT_URL="ws://livekit.odeuo.local:7880"
+
+        # Configure /etc/hosts
+        configure_local_hosts
+    else
+        USE_SUBDOMAINS=false
+        DOMAIN="localhost"
+        APP_URL="http://localhost"
+        N8N_URL="http://localhost/n8n"
+        CRM_URL="http://localhost:3002"
+        LIVEKIT_URL="ws://localhost:7880"
+    fi
 
     cat > .env << EOF
 # ============================================
-# Instify Local Development Environment
+# ODEUO Local Development Environment
 # Generated on $(date)
 # ============================================
 
@@ -164,15 +271,15 @@ DEBUG=true
 SKIP_ENV_VALIDATION=true
 
 # Application
-DOMAIN=localhost
-NEXT_PUBLIC_APP_URL=http://localhost
+DOMAIN=${DOMAIN}
+NEXT_PUBLIC_APP_URL=${APP_URL}
 
 # Database
-DATABASE_URL=postgresql://instify:${DB_PASSWORD}@localhost:5432/instify
+DATABASE_URL=postgresql://odeuo:${DB_PASSWORD}@localhost:5432/odeuo
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=instify
-DB_USER=instify
+DB_NAME=odeuo
+DB_USER=odeuo
 DB_PASSWORD=${DB_PASSWORD}
 
 # Redis
@@ -183,7 +290,7 @@ REDIS_PASSWORD=${REDIS_PASSWORD}
 
 # Security
 NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-NEXTAUTH_URL=http://localhost
+NEXTAUTH_URL=${APP_URL}
 JWT_SECRET=${JWT_SECRET}
 ENCRYPTION_KEY=${ENCRYPTION_KEY}
 WEBHOOK_SECRET=${WEBHOOK_SECRET}
@@ -205,15 +312,25 @@ TWILIO_PHONE_NUMBER=+1234567890
 # Voice AI (Livekit)
 LIVEKIT_API_KEY=devkey
 LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
-LIVEKIT_WS_URL=ws://localhost:7880
+LIVEKIT_WS_URL=${LIVEKIT_URL}
 
 # Automation (n8n)
 N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
 N8N_USER_MANAGEMENT_DISABLED=true
 N8N_BASIC_AUTH_ACTIVE=false
+N8N_WEBHOOK_URL=${N8N_URL}
 
 # Monitoring (optional)
 GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
+
+# Twenty CRM
+TWENTY_DB_USER=twenty
+TWENTY_DB_PASSWORD=${TWENTY_DB_PASSWORD}
+TWENTY_DB_NAME=twenty
+TWENTY_APP_SECRET=${TWENTY_APP_SECRET}
+TWENTY_SERVER_URL=${CRM_URL}
+TWENTY_FRONT_BASE_URL=${CRM_URL}
+TWENTY_LOG_LEVEL=debug
 
 # Development flags
 MOCK_EXTERNAL_APIS=true
@@ -221,6 +338,15 @@ ENABLE_DEBUG_LOGS=true
 EOF
 
     success "Local environment file created (.env)"
+
+    if [ "$USE_SUBDOMAINS" = true ]; then
+        echo ""
+        success "Subdomain configuration enabled!"
+        echo "  Main app: ${APP_URL}"
+        echo "  n8n: ${N8N_URL}"
+        echo "  CRM: ${CRM_URL}"
+        echo "  LiveKit: ${LIVEKIT_URL}"
+    fi
 }
 
 setup_production_environment() {
@@ -228,7 +354,7 @@ setup_production_environment() {
 
     cat > .env.production << EOF
 # ============================================
-# Instify Production Environment
+# ODEUO Production Environment
 # Generated on $(date)
 # ============================================
 
@@ -241,11 +367,11 @@ DOMAIN=your-domain.com
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 # Database
-DATABASE_URL=postgresql://instify:${DB_PASSWORD}@postgres:5432/instify
+DATABASE_URL=postgresql://odeuo:${DB_PASSWORD}@postgres:5432/odeuo
 DB_HOST=postgres
 DB_PORT=5432
-DB_NAME=instify
-DB_USER=instify
+DB_NAME=odeuo
+DB_USER=odeuo
 DB_PASSWORD=${DB_PASSWORD}
 
 # Redis
@@ -297,11 +423,15 @@ N8N_BASIC_AUTH_ACTIVE=true
 N8N_BASIC_AUTH_USER=admin
 N8N_BASIC_AUTH_PASSWORD=${GRAFANA_PASSWORD}
 
+# File Watcher (Automated Knowledge Base Ingestion)
+DEFAULT_TENANT_ID=default-tenant
+DEFAULT_CONTENT_TYPE=legal_knowledge
+
 # File Storage (DigitalOcean Spaces) - CHANGE THESE
 DO_SPACES_KEY=CHANGE_ME
 DO_SPACES_SECRET=CHANGE_ME
 DO_SPACES_ENDPOINT=nyc3.digitaloceanspaces.com
-DO_SPACES_BUCKET=instify-storage
+DO_SPACES_BUCKET=odeuo-storage
 
 # Monitoring
 GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
@@ -312,6 +442,15 @@ SSL_KEY_PATH=/etc/nginx/ssl/key.pem
 
 # Backup
 BACKUP_ENCRYPTION_PASSWORD=${ENCRYPTION_KEY}
+
+# Twenty CRM
+TWENTY_DB_USER=twenty
+TWENTY_DB_PASSWORD=${TWENTY_DB_PASSWORD}
+TWENTY_DB_NAME=twenty
+TWENTY_APP_SECRET=${TWENTY_APP_SECRET}
+TWENTY_SERVER_URL=https://your-domain.com/crm
+TWENTY_FRONT_BASE_URL=https://your-domain.com/crm
+TWENTY_LOG_LEVEL=info
 EOF
 
     success "Production environment template created (.env.production)"

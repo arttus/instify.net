@@ -41,8 +41,8 @@ datasources:
     type: postgres
     access: proxy
     url: postgres:5432
-    database: instify
-    user: instify
+    database: odeuo
+    user: odeuo
     secureJsonData:
       password: "${DB_PASSWORD}"
     jsonData:

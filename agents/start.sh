@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # ============================================
-# Instify Voice AI Agent Startup Script
+# ODEUO Voice AI Agent Startup Script
 # ============================================
 
 set -e
 
-echo "🚀 Starting Instify Voice AI Agent..."
+echo "🚀 Starting ODEUO Voice AI Agent..."
 
 # ============================================
 # Environment Setup

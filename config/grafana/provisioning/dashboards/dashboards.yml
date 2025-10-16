@@ -7,11 +7,11 @@ apiVersion: 1
 
 providers:
   # ============================================
-  # Instify Dashboards
+  # ODEUO Dashboards
   # ============================================
-  - name: 'instify-dashboards'
+  - name: 'odeuo-dashboards'
     orgId: 1
-    folder: 'Instify'
+    folder: 'ODEUO'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30

@@ -55,7 +55,7 @@ export default function SignInPage() {
   return (
     <div className="flex flex-col items-center space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Instify Admin</h1>
+        <h1 className="text-3xl font-bold">ODEUO Admin</h1>
         <p className="text-muted-foreground mt-2">
           Sign in to access the admin dashboard
         </p>
@@ -81,7 +81,7 @@ export default function SignInPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@instify.ai"
+                placeholder="admin@odeuo.ai"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -10,7 +10,7 @@ export default function SignInTestPage() {
   return (
     <div className="flex flex-col items-center space-y-6 p-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Instify Admin</h1>
+        <h1 className="text-3xl font-bold">ODEUO Admin</h1>
         <p className="text-muted-foreground mt-2">
           Sign in to access the admin dashboard
         </p>
@@ -30,7 +30,7 @@ export default function SignInTestPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@instify.ai"
+                placeholder="admin@odeuo.ai"
                 required
               />
             </div>

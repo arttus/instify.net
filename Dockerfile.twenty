@@ -1,0 +1,9 @@
+FROM twentycrm/twenty:v0.20.0
+
+# Copy the wrapper entrypoint script
+COPY entrypoint-twenty.sh /app/entrypoint-wrapper.sh
+RUN chmod +x /app/entrypoint-wrapper.sh
+
+ENTRYPOINT ["/app/entrypoint-wrapper.sh"]
+CMD ["node", "dist/src/main"]
+

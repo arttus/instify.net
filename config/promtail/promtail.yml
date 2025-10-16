@@ -58,13 +58,13 @@ scrape_configs:
   # ============================================
   # Application Logs (if using file logging)
   # ============================================
-  - job_name: instify-app-logs
+  - job_name: odeuo-app-logs
     static_configs:
       - targets:
           - localhost
         labels:
-          job: instify-app
-          __path__: /var/log/instify/*.log
+          job: odeuo-app
+          __path__: /var/log/odeuo/*.log
     
     pipeline_stages:
       # Parse structured JSON logs

@@ -1,12 +1,12 @@
 -- ============================================
--- Instify Development Database Seed Data
+-- ODEUO Development Database Seed Data
 -- ============================================
 
 -- Create development database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS instify_dev;
+CREATE DATABASE IF NOT EXISTS odeuo_dev;
 
 -- Use the development database
-\c instify_dev;
+\c odeuo_dev;
 
 -- ============================================
 -- Development Users (for testing)
@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS dev_users (
 
 -- Insert test users
 INSERT INTO dev_users (email, name, role) VALUES
-    ('admin@instify.local', 'Admin User', 'admin'),
-    ('test@instify.local', 'Test User', 'user'),
-    ('demo@instify.local', 'Demo User', 'user')
+    ('admin@odeuo.local', 'Admin User', 'admin'),
+    ('test@odeuo.local', 'Test User', 'user'),
+    ('demo@odeuo.local', 'Demo User', 'user')
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================
@@ -51,6 +51,6 @@ ON CONFLICT (key) DO UPDATE SET
 -- ============================================
 \echo 'Development seed data loaded successfully!'
 \echo 'Test users created:'
-\echo '  - admin@instify.local (admin)'
-\echo '  - test@instify.local (user)'
-\echo '  - demo@instify.local (user)'
+\echo '  - admin@odeuo.local (admin)'
+\echo '  - test@odeuo.local (user)'
+\echo '  - demo@odeuo.local (user)'

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Instify Backup Management Script
+# ODEUO Backup Management Script
 # Create, restore, and manage database backups
 # ============================================
 
@@ -60,8 +60,8 @@ create_backup() {
     # Create database backup
     log "Creating database backup..."
     docker compose exec -T postgres pg_dump \
-        -U instify \
-        -d instify \
+        -U odeuo \
+        -d odeuo \
         --format=custom \
         --compress=9 \
         --verbose \
@@ -119,23 +119,23 @@ restore_backup() {
     
     # Stop application to prevent connections
     log "Stopping application containers..."
-    docker compose stop instify-web n8n livekit || true
+    docker compose stop odeuo-web n8n livekit || true
     
     # Wait a moment for connections to close
     sleep 5
     
     # Drop and recreate database
     log "Recreating database..."
-    docker compose exec -T postgres psql -U instify -d postgres << EOF
-DROP DATABASE IF EXISTS instify;
-CREATE DATABASE instify OWNER instify;
+    docker compose exec -T postgres psql -U odeuo -d postgres << EOF
+DROP DATABASE IF EXISTS odeuo;
+CREATE DATABASE odeuo OWNER odeuo;
 EOF
     
     # Restore database
     log "Restoring database from backup..."
     docker compose exec -T postgres pg_restore \
-        -U instify \
-        -d instify \
+        -U odeuo \
+        -d odeuo \
         --clean \
         --if-exists \
         --verbose \
@@ -243,7 +243,7 @@ sync_to_remote() {
     fi
     
     # Sync backups to DigitalOcean Spaces
-    rclone sync "$BACKUP_DIR" do-spaces:instify-backups \
+    rclone sync "$BACKUP_DIR" do-spaces:odeuo-backups \
         --progress \
         --exclude "*.tmp" \
         --exclude "*.log"

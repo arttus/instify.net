@@ -78,7 +78,7 @@ logging:
 # ============================================
 webhook:
   urls:
-    - "http://instify-web:3000/api/webhooks/livekit"
+    - "http://odeuo-web:3000/api/webhooks/livekit"
     - "http://livekit-agents:8000/webhooks/livekit"
   api_key: "dev-webhook-secret"
 

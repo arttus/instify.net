@@ -14,7 +14,7 @@ export default function AdminPage() {
       <div>
         <h1 className="text-3xl font-bold">Welcome back, {user?.firstName || 'Admin'}!</h1>
         <p className="text-muted-foreground mt-2">
-          Here&apos;s what&apos;s happening with your Instify platform today.
+          Here&apos;s what&apos;s happening with your ODEUO platform today.
         </p>
       </div>
 

@@ -22,12 +22,12 @@ CREDENTIALS_DIR="$CONFIG_DIR/credentials"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Docker configuration - auto-detect environment
-if docker ps --format "table {{.Names}}" | grep -q "instify-n8n-prod"; then
+if docker ps --format "table {{.Names}}" | grep -q "odeuo-n8n-prod"; then
     # Production environment
-    N8N_CONTAINER="instify-n8n-prod"
-elif docker ps --format "table {{.Names}}" | grep -q "instify-n8n"; then
+    N8N_CONTAINER="odeuo-n8n-prod"
+elif docker ps --format "table {{.Names}}" | grep -q "odeuo-n8n"; then
     # Local/development environment
-    N8N_CONTAINER="instify-n8n"
+    N8N_CONTAINER="odeuo-n8n"
 else
     echo -e "${RED}Error: No n8n container found${NC}"
     exit 1

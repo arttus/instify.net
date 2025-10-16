@@ -1,8 +1,8 @@
-# Instify Infrastructure
+# ODEUO Infrastructure
 
 > **Multi-tenant B2B SaaS infrastructure for AI-powered customer engagement automation**
 
-This repository contains the complete Docker-based infrastructure for Instify, a platform that provides AI-powered automation for customer engagement across Instagram DMs, SMS, WhatsApp, and voice channels.
+This repository contains the complete Docker-based infrastructure for ODEUO, a platform that provides AI-powered automation for customer engagement across Instagram DMs, SMS, WhatsApp, and voice channels.
 
 ## 🏗️ Architecture Overview
 
@@ -43,7 +43,7 @@ This repository contains the complete Docker-based infrastructure for Instify, a
 
 1. **Quick setup (recommended):**
    ```bash
-   cd instify.net
+   cd odeuo.net
    npm install
    ./setup.sh local
    ```
@@ -65,7 +65,7 @@ This repository contains the complete Docker-based infrastructure for Instify, a
 3. **Access services:**
    - **Main App:** http://localhost
    - **n8n Admin:** http://localhost/n8n
-   - **pgAdmin:** http://localhost/pgadmin (admin@instify.com / admin)
+   - **pgAdmin:** http://localhost/pgadmin (admin@odeuo.com / admin)
    - **RedisInsight:** http://localhost/redis
    - **Health Check:** http://localhost/health
 
@@ -245,7 +245,7 @@ docker compose restart service-name
 **Database connection issues:**
 ```bash
 # Test database connection
-docker compose exec postgres pg_isready -U instify
+docker compose exec postgres pg_isready -U odeuo
 
 # Check database logs
 docker compose logs postgres

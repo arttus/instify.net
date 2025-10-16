@@ -47,7 +47,7 @@ const fileFormat = winston.format.combine(
 // Create the main logger
 const logger = winston.createLogger({
   level: settings.agent_log_level.toLowerCase(),
-  defaultMeta: { service: 'instify-agent' },
+  defaultMeta: { service: 'odeuo-agent' },
   transports: [
     // Console transport
     new winston.transports.Console({

@@ -1,5 +1,5 @@
 // ============================================
-// Instify Multi-Tenant Database Schema
+// ODEUO Multi-Tenant Database Schema
 // Using Drizzle ORM with PostgreSQL
 // ============================================
 

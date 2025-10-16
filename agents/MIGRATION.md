@@ -1,6 +1,6 @@
 # Migration from Python to JavaScript/TypeScript
 
-This document outlines the migration of the Instify Voice AI Agent from Python to JavaScript/TypeScript using the LiveKit Agents JS framework.
+This document outlines the migration of the ODEUO Voice AI Agent from Python to JavaScript/TypeScript using the LiveKit Agents JS framework.
 
 ## 🔄 Migration Overview
 
@@ -29,7 +29,7 @@ This document outlines the migration of the Instify Voice AI Agent from Python t
 | Python File | TypeScript File | Notes |
 |-------------|-----------------|-------|
 | `src/main.py` | `src/main.ts` | Main entry point with agent definition |
-| `src/agents/instify_agent.py` | `src/agents/instify-agent.ts` | Core agent logic |
+| `src/agents/odeuo_agent.py` | `src/agents/odeuo-agent.ts` | Core agent logic |
 | `src/config/settings.py` | `src/config/settings.ts` | Configuration with Zod validation |
 | `src/utils/logging_config.py` | `src/utils/logger.ts` | Winston-based logging |
 | `src/utils/health_server.py` | `src/utils/health-server.ts` | Express.js health server |
@@ -41,10 +41,10 @@ This document outlines the migration of the Instify Voice AI Agent from Python t
 ### 1. Agent Definition
 **Python (Before):**
 ```python
-class InstifyAgentRunner:
+class ODEUOAgentRunner:
     async def entrypoint(self, ctx: agents.JobContext):
         session = AgentSession(...)
-        agent = InstifyVoiceAgent(...)
+        agent = ODEUOVoiceAgent(...)
         await session.start(room=ctx.room, agent=agent)
 ```
 
@@ -55,7 +55,7 @@ export default defineAgent({
     proc.userData.vad = await silero.VAD.load();
   },
   entry: async (ctx: JobContext) => {
-    const agent = new InstifyVoiceAgent(ctx.room.name);
+    const agent = new ODEUOVoiceAgent(ctx.room.name);
     const session = new voice.AgentSession({...});
     await session.start({ agent, room: ctx.room });
   },
@@ -108,8 +108,8 @@ pnpm install
 pnpm dev
 
 # Or with Docker
-docker build -f Dockerfile.dev -t instify-agents:dev .
-docker run instify-agents:dev
+docker build -f Dockerfile.dev -t odeuo-agents:dev .
+docker run odeuo-agents:dev
 ```
 
 ### Production
@@ -121,8 +121,8 @@ pnpm build
 pnpm start
 
 # Or with Docker
-docker build -f Dockerfile.prod -t instify-agents:prod .
-docker run instify-agents:prod
+docker build -f Dockerfile.prod -t odeuo-agents:prod .
+docker run odeuo-agents:prod
 ```
 
 ### Testing

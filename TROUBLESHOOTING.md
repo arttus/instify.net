@@ -1,6 +1,6 @@
-# Instify Troubleshooting Guide
+# ODEUO Troubleshooting Guide
 
-> **Common issues and their solutions for Instify infrastructure**
+> **Common issues and their solutions for ODEUO infrastructure**
 
 ## 🚨 Emergency Quick Fixes
 
@@ -27,7 +27,7 @@ docker compose ps postgres
 docker compose restart postgres
 
 # 3. Wait 30 seconds, then test
-docker compose exec postgres pg_isready -U instify
+docker compose exec postgres pg_isready -U odeuo
 ```
 
 **SSL certificate expired:**
@@ -135,7 +135,7 @@ docker compose ps postgres
 docker compose logs postgres
 
 # Test connection
-docker compose exec postgres pg_isready -U instify
+docker compose exec postgres pg_isready -U odeuo
 
 # Solutions
 # - Restart PostgreSQL
@@ -151,14 +151,14 @@ npm run db:reset
 #### **Issue: Database queries are slow**
 ```bash
 # Check active connections
-docker compose exec postgres psql -U instify -d instify -c "
+docker compose exec postgres psql -U odeuo -d odeuo -c "
 SELECT count(*) as active_connections 
 FROM pg_stat_activity 
 WHERE state = 'active';
 "
 
 # Check slow queries
-docker compose exec postgres psql -U instify -d instify -c "
+docker compose exec postgres psql -U odeuo -d odeuo -c "
 SELECT query, calls, total_time, mean_time 
 FROM pg_stat_statements 
 ORDER BY total_time DESC 
@@ -175,14 +175,14 @@ LIMIT 5;
 #### **Issue: Database disk space full**
 ```bash
 # Check database size
-docker compose exec postgres psql -U instify -d instify -c "
-SELECT pg_size_pretty(pg_database_size('instify'));
+docker compose exec postgres psql -U odeuo -d odeuo -c "
+SELECT pg_size_pretty(pg_database_size('odeuo'));
 "
 
 # Solutions
 # - Clean old data
 # - Vacuum database
-docker compose exec postgres psql -U instify -d instify -c "VACUUM FULL;"
+docker compose exec postgres psql -U odeuo -d odeuo -c "VACUUM FULL;"
 
 # - Increase disk size (DigitalOcean)
 # - Set up log rotation
@@ -193,7 +193,7 @@ docker compose exec postgres psql -U instify -d instify -c "VACUUM FULL;"
 #### **Issue: Next.js app won't start**
 ```bash
 # Check logs
-docker compose logs instify-web
+docker compose logs odeuo-web
 
 # Common causes
 # - Node.js version mismatch
@@ -203,20 +203,20 @@ docker compose logs instify-web
 
 # Solutions
 # - Rebuild container
-docker compose build instify-web
-docker compose up -d instify-web
+docker compose build odeuo-web
+docker compose up -d odeuo-web
 
 # - Check environment variables
-docker compose exec instify-web env | grep -E "(CLERK|OPENAI|DATABASE)"
+docker compose exec odeuo-web env | grep -E "(CLERK|OPENAI|DATABASE)"
 
 # - Clear build cache
-docker compose build --no-cache instify-web
+docker compose build --no-cache odeuo-web
 ```
 
 #### **Issue: API endpoints returning 500 errors**
 ```bash
 # Check application logs
-./scripts/logs.sh service instify-web
+./scripts/logs.sh service odeuo-web
 
 # Check database connection
 curl http://localhost:3000/api/health
@@ -228,7 +228,7 @@ npm run db:migrate
 
 # - Check external API connectivity
 # - Restart application
-docker compose restart instify-web
+docker compose restart odeuo-web
 ```
 
 ### 4. Nginx Issues
@@ -263,7 +263,7 @@ docker compose ps
 
 # Solutions
 # - Restart backend services
-docker compose restart instify-web
+docker compose restart odeuo-web
 
 # - Check Nginx configuration
 docker compose exec nginx nginx -t
@@ -435,7 +435,7 @@ df -h && free -h > system_resources.txt
 ```
 
 ### Log Files to Check
-- Application logs: `./scripts/logs.sh service instify-web`
+- Application logs: `./scripts/logs.sh service odeuo-web`
 - Database logs: `./scripts/logs.sh service postgres`
 - Nginx logs: `./scripts/logs.sh access`
 - System logs: `/var/log/syslog`

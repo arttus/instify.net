@@ -39,7 +39,7 @@ server {
     # Main Application
     # ============================================
     location / {
-        proxy_pass http://instify_web;
+        proxy_pass http://odeuo_web;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -57,7 +57,7 @@ server {
     # ============================================
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
-        proxy_pass http://instify_web;
+        proxy_pass http://odeuo_web;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -71,7 +71,7 @@ server {
     # ============================================
     location /api/webhooks/ {
         limit_req zone=webhook_limit burst=50 nodelay;
-        proxy_pass http://instify_web;
+        proxy_pass http://odeuo_web;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -124,7 +124,7 @@ server {
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
-        proxy_pass http://instify_web;
+        proxy_pass http://odeuo_web;
         proxy_set_header Host $host;
     }
 }

@@ -29,7 +29,7 @@ error() {
 }
 
 # Configuration
-DEPLOY_DIR="/home/deploy/instify"
+DEPLOY_DIR="/home/deploy/odeuo"
 BACKUP_DIR="/home/deploy/backups"
 COMPOSE_FILE="docker-compose.prod.yml"
 
@@ -63,13 +63,13 @@ EXAMPLES:
     $0 --n8n
 
     # Restart specific services
-    $0 --restart instify-web,n8n
+    $0 --restart odeuo-web,n8n
 
     # Full container update with rebuild
     $0 --containers --force-rebuild
 
     # Update code and restart web service
-    $0 --code-only --restart instify-web
+    $0 --code-only --restart odeuo-web
 EOF
 }
 
@@ -130,7 +130,7 @@ create_backup() {
     BACKUP_NAME="backup_$(date +%Y%m%d_%H%M%S)"
     
     # Backup database
-    docker exec instify-postgres-prod pg_dump -U instify instify > "$BACKUP_DIR/${BACKUP_NAME}_db.sql" || warn "Database backup failed"
+    docker exec odeuo-postgres-prod pg_dump -U odeuo odeuo > "$BACKUP_DIR/${BACKUP_NAME}_db.sql" || warn "Database backup failed"
     
     # Backup current code
     tar -czf "$BACKUP_DIR/${BACKUP_NAME}_code.tar.gz" -C "$DEPLOY_DIR" . || warn "Code backup failed"
@@ -167,7 +167,7 @@ update_n8n() {
         cd "$DEPLOY_DIR"
         
         # Check if n8n container is running
-        if ! docker ps | grep -q "instify-n8n-prod"; then
+        if ! docker ps | grep -q "odeuo-n8n-prod"; then
             warn "n8n container is not running, skipping n8n update"
             return
         fi
@@ -243,11 +243,11 @@ health_check() {
     
     # Check web application
     if ! curl -f -s http://localhost:3000/api/health >/dev/null 2>&1; then
-        failed_services+=("instify-web")
+        failed_services+=("odeuo-web")
     fi
     
     # Check n8n if it should be running
-    if docker ps | grep -q "instify-n8n-prod"; then
+    if docker ps | grep -q "odeuo-n8n-prod"; then
         if ! curl -f -s http://localhost:5678/healthz >/dev/null 2>&1; then
             failed_services+=("n8n")
         fi
@@ -276,10 +276,10 @@ main() {
     
     log "🎉 Production update completed successfully!"
     log ""
-    log "Your Instify platform has been updated:"
-    log "  🌐 Main App: https://instify.net"
-    log "  🔧 n8n: https://n8n.instify.net"
-    log "  🎤 LiveKit: https://livekit.instify.net"
+    log "Your ODEUO platform has been updated:"
+    log "  🌐 Main App: https://odeuo.net"
+    log "  🔧 n8n: https://n8n.odeuo.net"
+    log "  🎤 LiveKit: https://livekit.odeuo.net"
     log ""
     log "If you encounter issues, you can:"
     log "  1. Check logs: docker-compose -f $COMPOSE_FILE logs [service]"

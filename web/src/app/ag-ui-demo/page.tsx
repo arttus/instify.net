@@ -84,9 +84,9 @@ export default function AgUiDemoPage() {
         {/* Integration Info */}
         <Card>
           <CardHeader>
-            <CardTitle>🔧 AG-UI Integration with Instify</CardTitle>
+            <CardTitle>🔧 AG-UI Integration with ODEUO</CardTitle>
             <CardDescription>
-              How Instify leverages the AG-UI protocol for customer engagement automation
+              How ODEUO leverages the AG-UI protocol for customer engagement automation
             </CardDescription>
           </CardHeader>
           <CardContent>

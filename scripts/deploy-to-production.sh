@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 # Configuration
 SERVER_IP="${SERVER_IP:-167.71.86.216}"
 SERVER_USER="${SERVER_USER:-deploy}"
-DEPLOY_DIR="/home/deploy/instify"
+DEPLOY_DIR="/home/deploy/odeuo"
 
 # Logging functions
 log() {
@@ -165,7 +165,7 @@ deploy() {
         # Run the appropriate update
         case "$deployment_type" in
             "code-only")
-                ./scripts/update-production.sh --code-only --restart instify-web
+                ./scripts/update-production.sh --code-only --restart odeuo-web
                 ;;
             "n8n")
                 ./scripts/update-production.sh --code-only --n8n
@@ -194,7 +194,7 @@ verify_deployment() {
     sleep 15
     
     # Check main application
-    if curl -f -s https://instify.net/api/health > /dev/null 2>&1; then
+    if curl -f -s https://odeuo.net/api/health > /dev/null 2>&1; then
         log "✅ Main application is healthy"
     else
         warn "❌ Main application health check failed"
@@ -202,7 +202,7 @@ verify_deployment() {
     fi
     
     # Check n8n
-    if curl -f -s https://n8n.instify.net/healthz > /dev/null 2>&1; then
+    if curl -f -s https://n8n.odeuo.net/healthz > /dev/null 2>&1; then
         log "✅ n8n is healthy"
     else
         warn "⚠️ n8n health check failed"
@@ -218,7 +218,7 @@ rollback() {
     
     ssh "$SERVER_USER@$SERVER_IP" << 'ENDSSH'
         set -e
-        cd /home/deploy/instify
+        cd /home/deploy/odeuo
         
         # Get previous commit
         PREVIOUS_COMMIT=$(git log --oneline -n 2 | tail -n 1 | cut -d' ' -f1)
@@ -232,7 +232,7 @@ rollback() {
         git checkout "$PREVIOUS_COMMIT"
         
         # Restart services
-        docker-compose -f docker-compose.prod.yml restart instify-web
+        docker-compose -f docker-compose.prod.yml restart odeuo-web
         
         echo "Rollback completed"
 ENDSSH
@@ -353,9 +353,9 @@ main() {
         log "🎉 Deployment successful!"
         log ""
         log "Your changes are now live at:"
-        log "  🌐 https://instify.net"
-        log "  🔧 https://n8n.instify.net"
-        log "  🎤 https://livekit.instify.net"
+        log "  🌐 https://odeuo.net"
+        log "  🔧 https://n8n.odeuo.net"
+        log "  🎤 https://livekit.odeuo.net"
     else
         warn "Deployment completed but verification failed"
         warn "You may want to check the logs or consider rolling back"

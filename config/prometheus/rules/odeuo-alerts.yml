@@ -1,0 +1,197 @@
+# ============================================
+# ODEUO Alerting Rules
+# Critical system and application alerts
+# ============================================
+
+groups:
+  # ============================================
+  # System Alerts
+  # ============================================
+  - name: system-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space is running low"
+          description: "Disk space is below 15% on {{ $labels.instance }}"
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space is critically low"
+          description: "Disk space is below 5% on {{ $labels.instance }}"
+
+  # ============================================
+  # Application Alerts
+  # ============================================
+  - name: application-alerts
+    rules:
+      - alert: WebApplicationDown
+        expr: up{job="odeuo-web"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Web application is down"
+          description: "The ODEUO web application has been down for more than 1 minute"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="odeuo-web"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is above 2 seconds for more than 5 minutes"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="odeuo-web",status=~"5.."}[5m]) / rate(http_requests_total{job="odeuo-web"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for more than 5 minutes"
+
+  # ============================================
+  # Database Alerts
+  # ============================================
+  - name: database-alerts
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      - alert: PostgreSQLTooManyConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL has too many connections"
+          description: "PostgreSQL is using more than 80% of available connections"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL query efficiency is below 10% for more than 10 minutes"
+
+  # ============================================
+  # Redis Alerts
+  # ============================================
+  - name: redis-alerts
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis is using more than 90% of allocated memory"
+
+      - alert: RedisHighConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis has high number of connections"
+          description: "Redis has more than 100 connected clients"
+
+  # ============================================
+  # Nginx Alerts
+  # ============================================
+  - name: nginx-alerts
+    rules:
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx is down"
+          description: "Nginx web server has been down for more than 1 minute"
+
+      - alert: NginxHighErrorRate
+        expr: rate(nginx_http_requests_total{status=~"4..|5.."}[5m]) / rate(nginx_http_requests_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nginx high error rate"
+          description: "Nginx error rate is above 10% for more than 5 minutes"
+
+  # ============================================
+  # Business Logic Alerts
+  # ============================================
+  - name: business-alerts
+    rules:
+      - alert: LowConversationVolume
+        expr: rate(odeuo_conversations_total[1h]) < 1
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low conversation volume"
+          description: "Conversation rate is below 1 per hour for more than 2 hours"
+
+      - alert: HighAICosts
+        expr: rate(odeuo_ai_cost_total[1h]) > 10
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI costs detected"
+          description: "AI costs are above $10/hour for more than 1 hour"
+
+      - alert: FailedWebhooks
+        expr: rate(odeuo_webhook_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High webhook failure rate"
+          description: "Webhook failure rate is above 10% for more than 5 minutes"

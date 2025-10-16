@@ -21,7 +21,7 @@ export default function SignUpPage() {
   return (
     <div className="flex flex-col items-center space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Instify Admin</h1>
+        <h1 className="text-3xl font-bold">ODEUO Admin</h1>
         <p className="text-muted-foreground mt-2">
           Registration is currently disabled
         </p>

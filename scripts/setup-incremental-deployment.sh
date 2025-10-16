@@ -21,7 +21,7 @@ warn() {
 }
 
 # Configuration
-DEPLOY_DIR="/home/deploy/instify"
+DEPLOY_DIR="/home/deploy/odeuo"
 BACKUP_DIR="/home/deploy/backups"
 
 log "Setting up incremental deployment system..."
@@ -88,7 +88,7 @@ else
 fi
 
 # Check database
-if docker exec instify-postgres-prod pg_isready -U instify > /dev/null 2>&1; then
+if docker exec odeuo-postgres-prod pg_isready -U odeuo > /dev/null 2>&1; then
     echo "✅ Database: Healthy"
 else
     echo "❌ Database: Unhealthy"
@@ -126,7 +126,7 @@ chmod +x scripts/cleanup.sh
 
 # Set up a simple cron job for cleanup
 log "Setting up automated cleanup..."
-(crontab -l 2>/dev/null; echo "0 2 * * 0 $DEPLOY_DIR/scripts/cleanup.sh >> /var/log/instify-cleanup.log 2>&1") | crontab -
+(crontab -l 2>/dev/null; echo "0 2 * * 0 $DEPLOY_DIR/scripts/cleanup.sh >> /var/log/odeuo-cleanup.log 2>&1") | crontab -
 
 # Create a deployment status file
 log "Creating deployment tracking..."

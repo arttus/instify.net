@@ -6,8 +6,8 @@
 global:
   # SMTP configuration for email alerts
   smtp_smarthost: 'localhost:587'
-  smtp_from: 'alerts@instify.com'
-  smtp_auth_username: 'alerts@instify.com'
+  smtp_from: 'alerts@odeuo.com'
+  smtp_auth_username: 'alerts@odeuo.com'
   smtp_auth_password: 'your-email-password'
   
   # Slack configuration
@@ -62,14 +62,14 @@ receivers:
   - name: 'default-receiver'
     slack_configs:
       - api_url: '{{ .slack_api_url }}'
-        channel: '#instify-alerts'
-        title: 'Instify Alert'
+        channel: '#odeuo-alerts'
+        title: 'ODEUO Alert'
         text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
 
   # Critical alerts (email + Slack + webhook)
   - name: 'critical-alerts'
     email_configs:
-      - to: 'admin@instify.com'
+      - to: 'admin@odeuo.com'
         subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
         body: |
           Alert: {{ .GroupLabels.alertname }}
@@ -84,7 +84,7 @@ receivers:
     
     slack_configs:
       - api_url: '{{ .slack_api_url }}'
-        channel: '#instify-critical'
+        channel: '#odeuo-critical'
         color: 'danger'
         title: '🚨 CRITICAL ALERT'
         text: |
@@ -96,14 +96,14 @@ receivers:
           {{ end }}
     
     webhook_configs:
-      - url: 'http://instify-web:3000/api/webhooks/alerts'
+      - url: 'http://odeuo-web:3000/api/webhooks/alerts'
         send_resolved: true
 
   # Warning alerts (Slack only)
   - name: 'warning-alerts'
     slack_configs:
       - api_url: '{{ .slack_api_url }}'
-        channel: '#instify-alerts'
+        channel: '#odeuo-alerts'
         color: 'warning'
         title: '⚠️ Warning Alert'
         text: |
@@ -115,7 +115,7 @@ receivers:
   # Database-specific alerts
   - name: 'database-alerts'
     email_configs:
-      - to: 'dba@instify.com'
+      - to: 'dba@odeuo.com'
         subject: '🗄️ Database Alert: {{ .GroupLabels.alertname }}'
         body: |
           Database Alert: {{ .GroupLabels.alertname }}
@@ -127,7 +127,7 @@ receivers:
     
     slack_configs:
       - api_url: '{{ .slack_api_url }}'
-        channel: '#instify-database'
+        channel: '#odeuo-database'
         color: 'warning'
         title: '🗄️ Database Alert'
         text: |
@@ -140,7 +140,7 @@ receivers:
   - name: 'application-alerts'
     slack_configs:
       - api_url: '{{ .slack_api_url }}'
-        channel: '#instify-app'
+        channel: '#odeuo-app'
         color: 'warning'
         title: '🚀 Application Alert'
         text: |

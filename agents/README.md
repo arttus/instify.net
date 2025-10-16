@@ -1,14 +1,14 @@
-# 🎙️ Instify Voice AI Agents
+# 🎙️ ODEUO Voice AI Agents
 
 AI-powered voice assistant for customer engagement automation using the LiveKit Agents JS framework.
 
 ## 🎯 Overview
 
-This directory contains the LiveKit Agents JS implementation for Instify's Voice AI capabilities. The agents provide:
+This directory contains the LiveKit Agents JS implementation for ODEUO's Voice AI capabilities. The agents provide:
 
 - **Real-time voice conversations** with customers
 - **Multi-language support** for global customer engagement
-- **Customer context awareness** from the Instify platform
+- **Customer context awareness** from the ODEUO platform
 - **Intelligent escalation** to human agents when needed
 - **Comprehensive analytics** and conversation tracking
 
@@ -21,7 +21,7 @@ agents/
 │   ├── config/
 │   │   └── settings.ts         # Configuration management with Zod validation
 │   ├── agents/
-│   │   └── instify-agent.ts    # Instify-specific agent logic
+│   │   └── odeuo-agent.ts    # ODEUO-specific agent logic
 │   ├── utils/
 │   │   ├── logger.ts           # Winston-based logging setup
 │   │   └── health-server.ts    # Express.js health check server
@@ -186,11 +186,11 @@ The agent automatically tracks:
 - Escalation triggers and patterns
 - Performance metrics (latency, accuracy)
 
-## 🔌 Integration with Instify Platform
+## 🔌 Integration with ODEUO Platform
 
 ### Customer Context
 
-The agent receives customer context from the Instify platform:
+The agent receives customer context from the ODEUO platform:
 
 ```python
 customer_context = {
@@ -204,11 +204,11 @@ customer_context = {
 
 ### Webhook Integration
 
-LiveKit events are sent to the Instify platform:
+LiveKit events are sent to the ODEUO platform:
 
 ```bash
 # Webhook endpoint
-POST http://instify-web:3000/api/webhooks/livekit
+POST http://odeuo-web:3000/api/webhooks/livekit
 
 # Event types
 - room_started
@@ -303,7 +303,7 @@ docker-compose -f docker-compose.dev.yml restart livekit-agents
 
 ## 🎉 Integration Complete!
 
-✅ **LiveKit Agents with Voice AI capabilities have been successfully integrated into the Instify Docker development environment!**
+✅ **LiveKit Agents with Voice AI capabilities have been successfully integrated into the ODEUO Docker development environment!**
 
 ### What's Been Implemented:
 
@@ -339,4 +339,4 @@ docker-compose -f docker-compose.dev.yml restart livekit-agents
 
 ## 📄 License
 
-This project is part of the Instify platform and follows the same licensing terms.
+This project is part of the ODEUO platform and follows the same licensing terms.

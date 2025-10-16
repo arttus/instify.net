@@ -1,7 +1,7 @@
 {
-  "name": "instify-infrastructure",
+  "name": "odeuo-infrastructure",
   "version": "1.0.0",
-  "description": "Multi-tenant B2B SaaS infrastructure for Instify AI automation platform",
+  "description": "Multi-tenant B2B SaaS infrastructure for ODEUO AI automation platform",
   "private": true,
   "scripts": {
     "dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
@@ -63,7 +63,7 @@
     "npm": ">=10.0.0"
   },
   "keywords": [
-    "instify",
+    "odeuo",
     "multi-tenant",
     "saas",
     "docker",
@@ -74,10 +74,10 @@
     "n8n",
     "ai-automation"
   ],
-  "author": "Instify Team",
+  "author": "ODEUO Team",
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourorg/instify.git"
+    "url": "https://github.com/yourorg/odeuo.git"
   }
 }

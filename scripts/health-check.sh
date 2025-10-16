@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Instify Health Check Script
+# ODEUO Health Check Script
 # Monitor system health and service status
 # ============================================
 
@@ -45,7 +45,7 @@ error() {
 check_docker_services() {
     log "Checking Docker services..."
     
-    local services=("postgres" "redis" "instify-web" "nginx" "n8n" "livekit")
+    local services=("postgres" "redis" "odeuo-web" "nginx" "n8n" "livekit")
     local healthy_count=0
     
     for service in "${services[@]}"; do
@@ -72,7 +72,7 @@ check_database_health() {
     log "Checking database health..."
     
     # Check if PostgreSQL is responding
-    if docker compose exec -T postgres pg_isready -U instify &>/dev/null; then
+    if docker compose exec -T postgres pg_isready -U odeuo &>/dev/null; then
         success "Database is responding"
     else
         error "Database is not responding"
@@ -80,7 +80,7 @@ check_database_health() {
     fi
     
     # Check database connection and basic query
-    local db_stats=$(docker compose exec -T postgres psql -U instify -d instify -t -c "
+    local db_stats=$(docker compose exec -T postgres psql -U odeuo -d odeuo -t -c "
         SELECT 
             current_database() as db,
             current_user as user,
@@ -98,8 +98,8 @@ check_database_health() {
     fi
     
     # Check database size
-    local db_size=$(docker compose exec -T postgres psql -U instify -d instify -t -c "
-        SELECT pg_size_pretty(pg_database_size('instify'));
+    local db_size=$(docker compose exec -T postgres psql -U odeuo -d odeuo -t -c "
+        SELECT pg_size_pretty(pg_database_size('odeuo'));
     " 2>/dev/null | xargs)
     
     if [[ -n "$db_size" ]]; then
@@ -139,7 +139,7 @@ check_web_application() {
     log "Checking web application health..."
     
     # Check internal health endpoint
-    if docker compose exec -T instify-web curl -f http://localhost:3000/api/health &>/dev/null; then
+    if docker compose exec -T odeuo-web curl -f http://localhost:3000/api/health &>/dev/null; then
         success "Internal web application health check passed"
     else
         error "Internal web application health check failed"
@@ -314,7 +314,7 @@ check_backups() {
 # ============================================
 
 run_full_health_check() {
-    echo "🏥 Instify Health Check"
+    echo "🏥 ODEUO Health Check"
     echo "======================"
     echo "Domain: $DOMAIN"
     echo "Time: $(date)"

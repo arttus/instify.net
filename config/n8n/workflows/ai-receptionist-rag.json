@@ -29,8 +29,8 @@
       "position": [460, 300],
       "credentials": {
         "openAiApi": {
-          "id": "openai-instify",
-          "name": "OpenAI - Instify"
+          "id": "openai-odeuo",
+          "name": "OpenAI - ODEUO"
         }
       }
     },
@@ -45,7 +45,7 @@
           "values": [
             {
               "role": "system",
-              "content": "You are an AI receptionist for Instify. Use the provided context to answer questions accurately and helpfully."
+              "content": "You are an AI receptionist for ODEUO. Use the provided context to answer questions accurately and helpfully."
             },
             {
               "role": "user",
@@ -61,8 +61,8 @@
       "position": [680, 300],
       "credentials": {
         "openAiApi": {
-          "id": "openai-instify",
-          "name": "OpenAI - Instify"
+          "id": "openai-odeuo",
+          "name": "OpenAI - ODEUO"
         }
       }
     }

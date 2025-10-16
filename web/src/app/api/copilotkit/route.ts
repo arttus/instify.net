@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
           type: 'message',
           timestamp: new Date().toISOString(),
           data: {
-            content: 'Hello! I\'m your Instify AI assistant, powered by the AG-UI protocol. How can I help you with your customer engagement automation today?',
+            content: 'Hello! I\'m your ODEUO AI assistant, powered by the AG-UI protocol. How can I help you with your customer engagement automation today?',
             role: 'assistant'
           },
           source: 'agent'

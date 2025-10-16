@@ -30,7 +30,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Temporary password protection - replace with proper auth
-    if (password === 'instify2024') {
+    if (password === 'odeuo2024') {
       setIsAuthorized(true);
       setShowPasswordPrompt(false);
     } else {

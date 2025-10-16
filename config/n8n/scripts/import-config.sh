@@ -22,18 +22,18 @@ CREDENTIALS_DIR="$CONFIG_DIR/credentials"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Docker configuration - auto-detect environment
-if [ -f "$PROJECT_ROOT/docker-compose.prod.yml" ] && docker ps --format "table {{.Names}}" | grep -q "instify-n8n-prod"; then
+if [ -f "$PROJECT_ROOT/docker-compose.prod.yml" ] && docker ps --format "table {{.Names}}" | grep -q "odeuo-n8n-prod"; then
     # Production environment
     COMPOSE_FILE="$PROJECT_ROOT/docker-compose.prod.yml"
-    N8N_CONTAINER="instify-n8n-prod"
-elif docker ps --format "table {{.Names}}" | grep -q "instify-n8n"; then
+    N8N_CONTAINER="odeuo-n8n-prod"
+elif docker ps --format "table {{.Names}}" | grep -q "odeuo-n8n"; then
     # Local/development environment
     COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
-    N8N_CONTAINER="instify-n8n"
+    N8N_CONTAINER="odeuo-n8n"
 else
     # Default to production
     COMPOSE_FILE="$PROJECT_ROOT/docker-compose.prod.yml"
-    N8N_CONTAINER="instify-n8n-prod"
+    N8N_CONTAINER="odeuo-n8n-prod"
 fi
 
 # Default options

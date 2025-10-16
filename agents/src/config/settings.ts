@@ -1,5 +1,5 @@
 /**
- * Configuration settings for Instify Voice AI agents
+ * Configuration settings for ODEUO Voice AI agents
  * Migrated from Python Pydantic settings to TypeScript with Zod validation
  */
 

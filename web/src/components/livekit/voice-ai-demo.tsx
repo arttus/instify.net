@@ -110,7 +110,7 @@ export function VoiceAIDemo({ className }: VoiceAIDemoProps) {
       const greeting: ConversationMessage = {
         id: 'greeting',
         speaker: 'ai',
-        message: "Welcome to Instify Voice AI! Click the microphone to start a conversation.",
+        message: "Welcome to ODEUO Voice AI! Click the microphone to start a conversation.",
         timestamp: new Date(),
         confidence: 1.0
       }

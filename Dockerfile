@@ -25,7 +25,28 @@ RUN \
   fi
 
 # ============================================
-# Stage 2: Builder
+# Stage 2: Development
+# ============================================
+FROM deps AS development
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copy source code from web directory (node_modules already in deps stage)
+COPY web/ .
+
+# Environment variables for development
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Expose port
+EXPOSE 3001
+
+# Start development server
+CMD ["npm", "run", "dev"]
+
+# ============================================
+# Stage 3: Builder
 # ============================================
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -49,7 +70,7 @@ RUN \
   fi
 
 # ============================================
-# Stage 3: Runner
+# Stage 4: Runner
 # ============================================
 FROM node:20-alpine AS runner
 WORKDIR /app

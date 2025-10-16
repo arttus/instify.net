@@ -1,5 +1,5 @@
 /**
- * Type definitions for Instify Voice AI Agent
+ * Type definitions for ODEUO Voice AI Agent
  */
 
 export interface CustomerContext {

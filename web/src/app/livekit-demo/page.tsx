@@ -84,9 +84,9 @@ export default function LiveKitDemoPage() {
         {/* Integration Info */}
         <Card>
           <CardHeader>
-            <CardTitle>🔧 LiveKit Integration with Instify</CardTitle>
+            <CardTitle>🔧 LiveKit Integration with ODEUO</CardTitle>
             <CardDescription>
-              How Instify leverages LiveKit for customer engagement automation
+              How ODEUO leverages LiveKit for customer engagement automation
             </CardDescription>
           </CardHeader>
           <CardContent>

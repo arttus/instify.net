@@ -1,6 +1,6 @@
 # ============================================
 # LiveKit Agents Development Dockerfile
-# Voice AI Agents for Instify Platform (Node.js/TypeScript)
+# Voice AI Agents for ODEUO Platform (Node.js/TypeScript)
 # ============================================
 
 FROM node:20-slim
@@ -73,7 +73,7 @@ ENV NODE_ENV=development
 ENV LIVEKIT_LOG_LEVEL=debug
 
 # Create non-root user for security
-RUN useradd -m -u 1000 agent && \
+RUN useradd -m -u 1001 agent && \
     chown -R agent:agent /app
 USER agent
 

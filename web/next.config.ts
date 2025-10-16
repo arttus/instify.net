@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // Enable server actions
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost', 'instify.local', 'instify.local:3000', 'instify.local:3001'],
+      allowedOrigins: ['localhost:3000', 'localhost', 'odeuo.local', 'odeuo.local:3000', 'odeuo.local:3001'],
     },
   },
 

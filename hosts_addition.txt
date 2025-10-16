@@ -1,5 +1,5 @@
 
-# Instify Local Development
-127.0.0.1    instify.local
-127.0.0.1    admin.instify.local
-127.0.0.1    api.instify.local
+# ODEUO Local Development
+127.0.0.1    odeuo.local
+127.0.0.1    admin.odeuo.local
+127.0.0.1    api.odeuo.local

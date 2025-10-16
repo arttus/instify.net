@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-# Instify Platform Deployment Script - Subdomain Architecture
+# ODEUO Platform Deployment Script - Subdomain Architecture
 # DigitalOcean Production Deployment with Subdomains
 # ============================================
 
@@ -19,8 +19,8 @@ DOMAIN=""
 EMAIL=""
 SERVER_IP=""
 DEPLOY_USER="deploy"
-GITHUB_REPO="https://github.com/arttus/instify.net.git"
-DEPLOY_DIR="/home/$DEPLOY_USER/instify"
+GITHUB_REPO="https://github.com/arttus/odeuo.net.git"
+DEPLOY_DIR="/home/$DEPLOY_USER/odeuo"
 
 # ============================================
 # Helper Functions
@@ -47,7 +47,7 @@ check_config() {
     log "Checking deployment configuration..."
     
     if [ -z "$DOMAIN" ]; then
-        read -p "Enter your domain name (e.g., instify.com): " DOMAIN
+        read -p "Enter your domain name (e.g., odeuo.com): " DOMAIN
     fi
     
     if [ -z "$EMAIL" ]; then
@@ -296,7 +296,7 @@ setup_database() {
     sleep 30
 
     # Run database migrations (if you have them)
-    # docker-compose -f docker-compose.prod.yml exec instify-web npm run db:migrate
+    # docker-compose -f docker-compose.prod.yml exec odeuo-web npm run db:migrate
 
     log "Database setup completed"
 }
@@ -337,7 +337,7 @@ post_deployment() {
     log "Running post-deployment tasks..."
 
     # Set up log rotation
-    sudo tee /etc/logrotate.d/instify > /dev/null <<EOF
+    sudo tee /etc/logrotate.d/odeuo > /dev/null <<EOF
 $DEPLOY_DIR/logs/*/*.log {
     daily
     missingok
@@ -350,18 +350,18 @@ $DEPLOY_DIR/logs/*/*.log {
 EOF
 
     # Create backup script
-    sudo tee /usr/local/bin/instify-backup > /dev/null <<EOF
+    sudo tee /usr/local/bin/odeuo-backup > /dev/null <<EOF
 #!/bin/bash
 BACKUP_DIR="$DEPLOY_DIR/backups"
 DATE=\$(date +%Y%m%d_%H%M%S)
-docker-compose -f $DEPLOY_DIR/docker-compose.prod.yml exec -T postgres pg_dump -U instify_prod instify_production > "\$BACKUP_DIR/instify_\$DATE.sql"
-find "\$BACKUP_DIR" -name "instify_*.sql" -mtime +7 -delete
+docker-compose -f $DEPLOY_DIR/docker-compose.prod.yml exec -T postgres pg_dump -U odeuo_prod odeuo_production > "\$BACKUP_DIR/odeuo_\$DATE.sql"
+find "\$BACKUP_DIR" -name "odeuo_*.sql" -mtime +7 -delete
 EOF
 
-    sudo chmod +x /usr/local/bin/instify-backup
+    sudo chmod +x /usr/local/bin/odeuo-backup
 
     # Set up daily backups
-    echo "0 2 * * * /usr/local/bin/instify-backup" | crontab -
+    echo "0 2 * * * /usr/local/bin/odeuo-backup" | crontab -
 
     log "Post-deployment setup completed"
 }
@@ -371,7 +371,7 @@ EOF
 # ============================================
 
 main() {
-    log "Starting Instify Platform deployment with subdomain architecture..."
+    log "Starting ODEUO Platform deployment with subdomain architecture..."
 
     check_config
     setup_server
@@ -385,7 +385,7 @@ main() {
 
     log "🎉 Deployment completed successfully!"
     log ""
-    log "Your Instify platform is now running with subdomain architecture:"
+    log "Your ODEUO platform is now running with subdomain architecture:"
     log "  🌐 Main App: https://$DOMAIN"
     log "  🔧 n8n: https://n8n.$DOMAIN"
     log "  🎤 LiveKit: https://livekit.$DOMAIN"
@@ -426,7 +426,7 @@ while [[ $# -gt 0 ]]; do
         --help)
             echo "Usage: $0 [--domain DOMAIN] [--email EMAIL] [--server-ip IP]"
             echo ""
-            echo "This script deploys Instify with subdomain architecture:"
+            echo "This script deploys ODEUO with subdomain architecture:"
             echo "  - Main app: https://DOMAIN"
             echo "  - n8n: https://n8n.DOMAIN"
             echo "  - LiveKit: https://livekit.DOMAIN"

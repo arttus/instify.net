@@ -9,22 +9,17 @@ services:
   # ============================================
   # Development Web Application
   # ============================================
-  instify-web:
+  odeuo-web:
     build:
-      target: deps  # Stop at deps stage for development
-    command: npm run dev
+      target: development  # Use development stage with source code baked in
     environment:
       - NODE_ENV=development
       - DEBUG=true
       - SKIP_ENV_VALIDATION=true
       - WATCHPACK_POLLING=true
-    volumes:
-      # Mount source code for hot reload
-      - ./web:/app
-      - /app/node_modules
-      - /app/.next
+      - WEB_PORT=3001  # Override the port to avoid conflict with Twenty CRM
     ports:
-      - "3000:3001"  # Map host port 3000 to container port 3001
+      - "3005:3001"  # Map host port 3005 to container port 3001 (temporary workaround for port conflict)
       - "9229:9229"  # Node.js debugging port
 
   # ============================================
@@ -34,10 +29,14 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=instify_dev
+      - POSTGRES_DB=odeuo_dev
+      # Twenty CRM database credentials (for init script)
+      - TWENTY_DB_USER=${TWENTY_DB_USER:-twenty}
+      - TWENTY_DB_PASSWORD=${TWENTY_DB_PASSWORD}
+      - TWENTY_DB_NAME=${TWENTY_DB_NAME:-twenty}
     volumes:
       # Add development seed data
-      - ./scripts/dev-seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+      - ./scripts/dev-seed.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
 
   # ============================================
   # Development Redis (with exposed port)
@@ -50,11 +49,11 @@ services:
     environment: []
 
   # ============================================
-  # Development n8n (access via n8n.instify.local subdomain)
+  # Development n8n (access via n8n.odeuo.local subdomain)
   # ============================================
   n8n:
     # ports:
-    #   - "5678:5678"  # Removed - access via n8n.instify.local subdomain
+    #   - "5678:5678"  # Removed - access via n8n.odeuo.local subdomain
     environment:
       - NODE_ENV=development
       - N8N_LOG_LEVEL=debug
@@ -85,7 +84,7 @@ services:
     build:
       context: ./agents
       dockerfile: Dockerfile.dev
-    container_name: instify-livekit-agents-dev
+    container_name: odeuo-livekit-agents-dev
     restart: unless-stopped
     environment:
       # LiveKit Connection
@@ -119,7 +118,7 @@ services:
       # Mount logs for debugging
       - ./logs/agents:/app/logs
     networks:
-      - instify-network
+      - odeuo-network
     depends_on:
       - livekit
       - redis
@@ -136,34 +135,155 @@ services:
   # ============================================
   # Development Tools
   # ============================================
-  
+
   # Database Admin (pgAdmin)
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: instify-pgadmin
+    container_name: odeuo-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@instify.dev
+      PGADMIN_DEFAULT_EMAIL: admin@odeuo.dev
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "8080:80"
     networks:
-      - instify-network
+      - odeuo-network
     depends_on:
       - postgres
 
-  # Redis Admin (RedisInsight) - Access via redis.instify.local
+  # Redis Admin (RedisInsight) - Access via redis.odeuo.local
   redis-insight:
     image: redislabs/redisinsight:latest
-    container_name: instify-redis-insight
+    container_name: odeuo-redis-insight
     restart: unless-stopped
     # ports:
-    #   - "8002:8001"  # Removed - access via redis.instify.local subdomain
+    #   - "8002:8001"  # Removed - access via redis.odeuo.local subdomain
     networks:
-      - instify-network
+      - odeuo-network
     depends_on:
       - redis
+
+  # ============================================
+  # Twenty CRM Server (Development)
+  # ============================================
+  twenty-server:
+    image: twentycrm/twenty:latest
+    container_name: odeuo-twenty-server
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      PG_DATABASE_URL: "postgresql://${TWENTY_DB_USER:-twenty}:${TWENTY_DB_PASSWORD}@postgres:5432/${TWENTY_DB_NAME:-twenty}"
+
+      # Redis Configuration
+      REDIS_URL: "redis://redis:6379"
+
+      # Server Configuration
+      SERVER_URL: "${TWENTY_SERVER_URL:-http://crm.odeuo.local}"
+      FRONT_BASE_URL: "${TWENTY_FRONT_BASE_URL:-http://crm.odeuo.local}"
+
+      # Security - JWT Tokens (use environment variables)
+      ACCESS_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+      REFRESH_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+      APP_SECRET: "${TWENTY_APP_SECRET}"
+      LOGIN_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+      REFRESH_TOKEN_EXPIRES_IN: "90d"
+      ACCESS_TOKEN_EXPIRES_IN: "30m"
+
+      # Node Environment
+      NODE_ENV: development
+      LOG_LEVEL: "${TWENTY_LOG_LEVEL:-debug}"
+
+      # Database Migrations - ENABLE for first run to initialize schema
+      ENABLE_DB_MIGRATIONS: "true"
+
+      # Optional: Integrations
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+      # Storage Configuration
+      STORAGE_TYPE: "local"
+      STORAGE_LOCAL_PATH: "/app/data"
+
+    ports:
+      - "3002:3000"  # Twenty server port
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    networks:
+      - odeuo-network
+
+    volumes:
+      - twenty_server_data:/app/data
+      - ./logs/twenty:/app/logs
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s  # Increased to allow for migrations
+
+  # ============================================
+  # Twenty CRM Worker (Development)
+  # ============================================
+  twenty-worker:
+    image: twentycrm/twenty:latest
+    container_name: odeuo-twenty-worker
+    restart: unless-stopped
+    command: npm run worker:prod
+    environment:
+      # Database Configuration
+      PG_DATABASE_URL: "postgresql://${TWENTY_DB_USER:-twenty}:${TWENTY_DB_PASSWORD}@postgres:5432/${TWENTY_DB_NAME:-twenty}"
+
+      # Redis Configuration
+      REDIS_URL: "redis://redis:6379"
+
+      # Server Configuration
+      SERVER_URL: "${TWENTY_SERVER_URL:-http://crm.odeuo.local}"
+
+      # Security - JWT Tokens (use environment variables)
+      ACCESS_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+      REFRESH_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+      APP_SECRET: "${TWENTY_APP_SECRET}"
+      LOGIN_TOKEN_SECRET: "${TWENTY_APP_SECRET}"
+
+      # Node Environment
+      NODE_ENV: development
+      LOG_LEVEL: "${TWENTY_LOG_LEVEL:-debug}"
+
+      # Database Migrations - Disabled for worker
+      ENABLE_DB_MIGRATIONS: "false"
+
+      # Storage Configuration
+      STORAGE_TYPE: "local"
+      STORAGE_LOCAL_PATH: "/app/data"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      twenty-server:
+        condition: service_healthy
+
+    networks:
+      - odeuo-network
+
+    volumes:
+      - twenty_server_data:/app/data  # Share data volume with server
+      - ./logs/twenty-worker:/app/logs
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]  # Simple health check for worker
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # ============================================
   # Development Nginx (simplified)
@@ -176,8 +296,18 @@ services:
       - "80:80"
       # Remove HTTPS port for development
     depends_on:
-      - instify-web
+      - odeuo-web
       - n8n
       - livekit
       - pgadmin
       - redis-insight
+      - twenty-server
+
+
+# ============================================
+# Development Volumes
+# ============================================
+volumes:
+  twenty_server_data:
+    driver: local
+    name: odeuo-twenty-data-dev

@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs';
+import { Inter, Playfair_Display } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -15,8 +22,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Instify - AI-Powered Customer Engagement",
-  description: "Multi-tenant B2B SaaS platform for AI-powered customer engagement automation across Instagram DMs, SMS, WhatsApp, and voice channels.",
+  title: "AI Automation for Law Firms | Transform Your Practice",
+  description: "Never lose another client. Transform your law practice with AI automation - 24/7 AI voice receptionist, lead capture, and practice operations. Start with a free practice transformation audit.",
+  keywords: "AI for law firms, legal automation, AI receptionist, law firm technology, practice management automation",
 };
 
 export default function RootLayout({
@@ -25,16 +33,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <Providers>
-            {children}
-          </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${playfair.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
   );
 }

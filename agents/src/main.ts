@@ -1,5 +1,5 @@
 /**
- * Instify Voice AI Agent - Main Entry Point
+ * ODEUO Voice AI Agent - Main Entry Point
  * Migrated from Python to TypeScript using LiveKit Agents JS framework
  */
 
@@ -20,7 +20,7 @@ import * as elevenlabs from '@livekit/agents-plugin-elevenlabs';
 import * as livekit from '@livekit/agents-plugin-livekit';
 
 import { fileURLToPath } from 'node:url';
-import { InstifyVoiceAgent } from './agents/instify-agent.js';
+import { ODEUOVoiceAgent } from './agents/odeuo-agent.js';
 import { settings } from './config/settings.js';
 import { setupLogging, agentLogger } from './utils/logger.js';
 import { startHealthServer, updateAgentMetrics } from './utils/health-server.js';
@@ -113,7 +113,7 @@ export default defineAgent({
   },
 
   entry: async (ctx: JobContext) => {
-    agentLogger.info('🚀 Starting Instify Voice AI Agent');
+    agentLogger.info('🚀 Starting ODEUO Voice AI Agent');
     agentLogger.info(`Agent Mode: ${settings.agent_mode}`);
     agentLogger.info(`LiveKit URL: ${settings.livekit_url}`);
 
@@ -143,8 +143,8 @@ export default defineAgent({
       }
     }
 
-    // Create the Instify-specific agent
-    const agent = new InstifyVoiceAgent(ctx.room.name || 'unknown', customerContext);
+    // Create the ODEUO-specific agent
+    const agent = new ODEUOVoiceAgent(ctx.room.name || 'unknown', customerContext);
 
     // Create agent session with configured models
     const session = new voice.AgentSession({
