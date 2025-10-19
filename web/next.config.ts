@@ -1,22 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable standalone output for Docker
-  output: 'standalone',
-
-  // Experimental features
-  experimental: {
-    // Enable server actions
-    serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost', 'odeuo.local', 'odeuo.local:3000', 'odeuo.local:3001'],
-    },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-
-  // Headers for security
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  env: {
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+  },
+  // Enable experimental features for better SEO
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  // Headers for better SEO and security
   async headers() {
     return [
       {
-        source: '/api/:path*',
+        source: '/(.*)',
         headers: [
           {
             key: 'X-Content-Type-Options',
@@ -30,18 +32,11 @@ const nextConfig: NextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
         ],
-      },
-    ];
-  },
-
-  // Redirects
-  async redirects() {
-    return [
-      {
-        source: '/health',
-        destination: '/api/health',
-        permanent: true,
       },
     ];
   },

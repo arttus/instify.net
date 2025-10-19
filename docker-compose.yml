@@ -67,7 +67,7 @@ services:
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    command: redis-server --maxmemory 256mb --maxmemory-policy noeviction --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
@@ -193,10 +193,11 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      test: ["CMD", "curl", "-f", "-u", "${N8N_USER:-admin}:${N8N_PASSWORD}", "http://localhost:5678/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
   # ============================================
   # Nginx Reverse Proxy

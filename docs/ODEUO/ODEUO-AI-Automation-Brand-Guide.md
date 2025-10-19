@@ -185,7 +185,6 @@ Caption: 12pt Inter Regular, 1.5 line height
 
 ### Typography Rules
 
-- **Never use serif fonts** — we're a modern AI technology company
 - **Maintain generous white space** — minimum 1.6 line height
 - **Use sentence case for headings** — not Title Case (more approachable)
 - **Limit line length to 65-75 characters** for optimal readability
